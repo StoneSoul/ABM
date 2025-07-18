@@ -14,6 +14,11 @@
     <button type="submit">Guardar</button>
   </form>
   <script>
+    const params = new URLSearchParams(window.location.search);
+    const userParam = params.get("username");
+    if (userParam) {
+      document.querySelector("input[name=username]").value = userParam;
+    }
     document.getElementById('modificarForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const data = Object.fromEntries(new FormData(e.target).entries());

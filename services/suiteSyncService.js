@@ -26,3 +26,15 @@ exports.actualizarClave = async ({ username, password }) => {
     throw error;
   }
 };
+
+exports.actualizarEstado = async ({ username, estado }) => {
+  try {
+    await axios.post(`${SUITE_API}/update-status`, {
+      username,
+      estado,
+    });
+  } catch (error) {
+    console.error('Error actualizando estado en Suite:', error.response?.data || error);
+    throw error;
+  }
+};
