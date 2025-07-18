@@ -18,6 +18,7 @@
     "mssql": "*",
     "mysql2": "*",
     "dotenv": "*",
-    "php-serialize": "*"
+    "php-serialize": "*",
+    "express-validator": "*"
   }
 }
