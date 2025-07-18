@@ -1,4 +1,4 @@
-const sql = require('mssql');
+const mysql = require('mysql2/promise');
 const { syncToWordpress } = require('../services/wpSyncService');
 const { syncToSuite, actualizarClave } = require('../services/suiteSyncService');
 
@@ -45,25 +45,22 @@ exports.passwordCambiadaDesdeWp = async (req, res, next) => {
 // ✅ NUEVA FUNCIÓN PARA LISTAR USUARIOS
 exports.listarUsuarios = async (req, res, next) => {
   try {
-    const pool = await sql.connect({
+    const connection = await mysql.createConnection({
+      host: process.env.DB_HOST,
       user: process.env.DB_USER,
       password: process.env.DB_PASS,
-      server: process.env.DB_HOST,
       database: process.env.DB_NAME,
-      options: {
-        encrypt: false,
-        trustServerCertificate: true
-      }
+      port: process.env.DB_PORT || 3306
     });
 
-    const result = await pool.request().query(`
-      SELECT username, email, nombre_completo, rol, cod_profesional, estado
-      FROM usuarios
-      ORDER BY fecha_alta DESC
-    `);
+    const [rows] = await connection.execute(
+      `SELECT username, email, nombre_completo, rol, cod_profesional, estado
+       FROM usuarios
+       ORDER BY fecha_alta DESC`
+    );
 
-    res.json(result.recordset);
-    pool.close();
+    res.json(rows);
+    await connection.end();
   } catch (error) {
     console.error('❌ Error al listar usuarios:', error);
     next(error);
