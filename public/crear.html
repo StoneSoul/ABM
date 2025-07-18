@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Crear Usuario</title>
+</head>
+<body>
+  <h2>Crear Usuario</h2>
+  <form id="crearForm">
+    <input type="text" name="username" placeholder="Usuario" required><br>
+    <input type="password" name="password" placeholder="Clave" required><br>
+    <input type="email" name="email" placeholder="Email" required><br>
+    <input type="text" name="rol" placeholder="Rol"><br>
+    <button type="submit">Guardar</button>
+  </form>
+  <script>
+    document.getElementById('crearForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(e.target).entries());
+      const res = await fetch('/api/usuarios/crear', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      if (res.ok) {
+        alert('Usuario creado');
+        e.target.reset();
+      } else {
+        alert('Error al crear');
+      }
+    });
+  </script>
+</body>
+</html>

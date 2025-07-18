@@ -12,13 +12,14 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "express": "*",
     "axios": "*",
     "body-parser": "*",
+    "dotenv": "*",
+    "express": "*",
+    "express-session": "^1.18.2",
+    "express-validator": "*",
     "mssql": "*",
     "mysql2": "*",
-    "dotenv": "*",
-    "php-serialize": "*",
-    "express-validator": "*"
+    "php-serialize": "*"
   }
 }

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Modificar Usuario</title>
+</head>
+<body>
+  <h2>Modificar Usuario</h2>
+  <form id="modificarForm">
+    <input type="text" name="username" placeholder="Usuario" required><br>
+    <input type="password" name="password" placeholder="Nueva clave"><br>
+    <input type="email" name="email" placeholder="Email"><br>
+    <input type="text" name="rol" placeholder="Rol"><br>
+    <button type="submit">Guardar</button>
+  </form>
+  <script>
+    document.getElementById('modificarForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(e.target).entries());
+      const res = await fetch('/api/usuarios/modificar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      if (res.ok) {
+        alert('Usuario modificado');
+      } else {
+        alert('Error al modificar');
+      }
+    });
+  </script>
+</body>
+</html>
