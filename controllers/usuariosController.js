@@ -66,3 +66,25 @@ exports.listarUsuarios = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.cambiarEstado = async (req, res, next) => {
+  try {
+    const { username, estado } = req.body;
+    const connection = await mysql.createConnection({
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASS,
+      database: process.env.DB_NAME,
+      port: process.env.DB_PORT || 3306
+    });
+    await connection.execute(
+      'UPDATE usuarios SET estado = ? WHERE username = ?',
+      [estado, username]
+    );
+    res.json({ mensaje: 'Estado actualizado' });
+    await connection.end();
+  } catch (error) {
+    console.error('❌ Error al cambiar estado del usuario:', error);
+    next(error);
+  }
+};

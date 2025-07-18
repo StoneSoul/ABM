@@ -37,6 +37,7 @@
         <th onclick="ordenar(3)">Rol</th>
         <th onclick="ordenar(4)">Código Profesional</th>
         <th onclick="ordenar(5)">Estado</th>
+        <th>Acción</th>
       </tr>
     </thead>
     <tbody id="contenidoTabla"></tbody>
@@ -58,9 +59,20 @@
           <td>${u.rol}</td>
           <td>${u.cod_profesional}</td>
           <td>${u.estado === 1 ? 'Activo' : 'Inactivo'}</td>
+          <td><button onclick="toggleEstado('${u.username}', ${u.estado})">${u.estado === 1 ? 'Deshabilitar' : 'Habilitar'}</button></td>
         `;
         tbody.appendChild(fila);
       }
+    }
+
+    async function toggleEstado(username, estado) {
+      const nuevo = estado === 1 ? 0 : 1;
+      await fetch('/api/usuarios/estado', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, estado: nuevo })
+      });
+      cargarUsuarios();
     }
 
     document.getElementById('buscador').addEventListener('input', function() {
