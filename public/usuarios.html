@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Listado de Usuarios</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    input[type="text"] {
+      width: 300px; padding: 8px; margin-bottom: 15px;
+      border: 1px solid #ccc; border-radius: 4px;
+    }
+    table {
+      border-collapse: collapse; width: 100%;
+    }
+    th, td {
+      border: 1px solid #ccc; padding: 8px;
+    }
+    th {
+      background-color: #00414a; color: white;
+      cursor: pointer;
+    }
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+  </style>
+</head>
+<body>
+  <h2>Usuarios Importados</h2>
+  <input type="text" id="buscador" placeholder="Buscar usuarios...">
+
+  <table id="tablaUsuarios">
+    <thead>
+      <tr>
+        <th onclick="ordenar(0)">Usuario</th>
+        <th onclick="ordenar(1)">Email</th>
+        <th onclick="ordenar(2)">Nombre completo</th>
+        <th onclick="ordenar(3)">Rol</th>
+        <th onclick="ordenar(4)">Código Profesional</th>
+        <th onclick="ordenar(5)">Estado</th>
+      </tr>
+    </thead>
+    <tbody id="contenidoTabla"></tbody>
+  </table>
+
+  <script>
+    async function cargarUsuarios() {
+      const res = await fetch('/api/usuarios');
+      const datos = await res.json();
+      const tbody = document.getElementById('contenidoTabla');
+      tbody.innerHTML = '';
+
+      for (const u of datos) {
+        const fila = document.createElement('tr');
+        fila.innerHTML = `
+          <td>${u.username}</td>
+          <td>${u.email}</td>
+          <td>${u.nombre_completo}</td>
+          <td>${u.rol}</td>
+          <td>${u.cod_profesional}</td>
+          <td>${u.estado === 1 ? 'Activo' : 'Inactivo'}</td>
+        `;
+        tbody.appendChild(fila);
+      }
+    }
+
+    document.getElementById('buscador').addEventListener('input', function() {
+      const filtro = this.value.toLowerCase();
+      const filas = document.querySelectorAll('#tablaUsuarios tbody tr');
+      filas.forEach(fila => {
+        const texto = fila.textContent.toLowerCase();
+        fila.style.display = texto.includes(filtro) ? '' : 'none';
+      });
+    });
+
+    function ordenar(columna) {
+      const filas = Array.from(document.querySelectorAll('#tablaUsuarios tbody tr'));
+      const ascendente = !this.ascendente;
+      this.ascendente = ascendente;
+
+      filas.sort((a, b) => {
+        const valA = a.children[columna].textContent.toLowerCase();
+        const valB = b.children[columna].textContent.toLowerCase();
+        return ascendente ? valA.localeCompare(valB) : valB.localeCompare(valA);
+      });
+
+      const tbody = document.getElementById('contenidoTabla');
+      tbody.innerHTML = '';
+      filas.forEach(f => tbody.appendChild(f));
+    }
+
+    cargarUsuarios();
+  </script>
+</body>
+</html>

@@ -1,83 +1,77 @@
-const sql = require('mssql');
-const phpUnserialize = require('php-serialize').unserialize;
+const mysql = require('mysql2/promise');
+const { unserialize } = require('php-serialize');
 
-// Configuración conexión a WordPress
+// Configuración conexión a WordPress (Hostinger)
 const wpConfig = {
-  user: 'wp_user',
-  password: 'wp_password',
-  server: '192.168.14.69', // IP del servidor de WordPress
-  database: 'wordpress',
-  options: {
-    encrypt: false,
-    trustServerCertificate: true
-  }
+  host: '193.203.175.223',
+  user: 'u154911466_RXlkX',
+  password: 'rDcxAmPF4u',
+  database: 'u154911466_7PmpE',
 };
 
-// Configuración conexión al ABM
+// Configuración conexión al ABM (MySQL)
 const abmConfig = {
+  host: '192.168.14.69',
   user: 'admin',
   password: 'Imc233',
-  server: '192.168.14.69', // IP del servidor del ABM
   database: 'abm_usuarios',
-  options: {
-    encrypt: false,
-    trustServerCertificate: true
-  }
 };
 
 async function importarUsuarios() {
   try {
-    const wpPool = await sql.connect(wpConfig);
+    const wpConn = await mysql.createConnection(wpConfig);
+    const abmConn = await mysql.createConnection(abmConfig);
 
-    const result = await wpPool.request().query(\`
+    const [rows] = await wpConn.execute(`
       SELECT 
+        u.ID,
         u.user_login AS username,
         u.user_email AS email,
-        r.meta_value AS rol_serializado,
-        p.meta_value AS cod_profesional,
-        f.meta_value AS first_name,
-        l.meta_value AS last_name,
-        n.meta_value AS nickname
+        (SELECT meta_value FROM wp_usermeta WHERE user_id = u.ID AND meta_key = 'wp_capabilities') AS rol_serializado,
+        (SELECT meta_value FROM wp_usermeta WHERE user_id = u.ID AND meta_key = 'professional_code') AS cod_profesional,
+        (SELECT meta_value FROM wp_usermeta WHERE user_id = u.ID AND meta_key = 'first_name') AS first_name,
+        (SELECT meta_value FROM wp_usermeta WHERE user_id = u.ID AND meta_key = 'last_name') AS last_name
       FROM wp_users u
-      LEFT JOIN wp_usermeta r ON u.ID = r.user_id AND r.meta_key = 'wp_capabilities'
-      LEFT JOIN wp_usermeta p ON u.ID = p.user_id AND p.meta_key = 'professional_code'
-      LEFT JOIN wp_usermeta f ON u.ID = f.user_id AND f.meta_key = 'first_name'
-      LEFT JOIN wp_usermeta l ON u.ID = l.user_id AND l.meta_key = 'last_name'
-      LEFT JOIN wp_usermeta n ON u.ID = n.user_id AND n.meta_key = 'nickname';
-    \`);
+    `);
 
-    const abmPool = await sql.connect(abmConfig);
-
-    for (const row of result.recordset) {
+    for (const row of rows) {
       let rol = '';
       try {
-        const roles = phpUnserialize(row.rol_serializado || 'a:0:{}');
+        const roles = unserialize(row.rol_serializado || 'a:0:{}');
         rol = Object.keys(roles)[0] || '';
       } catch (e) {
-        console.warn('Error deserializando rol:', row.username);
+        console.warn('⚠️ Error deserializando rol:', row.username);
       }
 
-      await abmPool.request()
-        .input('username', sql.NVarChar, row.username)
-        .input('email', sql.NVarChar, row.email)
-        .input('nombre_completo', sql.NVarChar, (row.first_name || '') + ' ' + (row.last_name || ''))
-        .input('rol', sql.NVarChar, rol)
-        .input('cod_profesional', sql.NVarChar, row.cod_profesional || '')
-        .input('estado', sql.Bit, 1)
-        .query(\`
-          IF NOT EXISTS (SELECT 1 FROM usuarios WHERE username = @username)
-          INSERT INTO usuarios (username, email, nombre_completo, rol, cod_profesional, estado, fecha_alta, fecha_modificacion)
-          VALUES (@username, @email, @nombre_completo, @rol, @cod_profesional, @estado, GETDATE(), GETDATE());
-        \`);
+      const nombreCompleto = `${row.first_name || ''} ${row.last_name || ''}`.trim();
 
-      console.log('Importado:', row.username);
+      await abmConn.execute(`
+        INSERT INTO usuarios 
+          (username, email, nombre_completo, rol, cod_profesional, estado, fecha_alta, fecha_modificacion)
+        SELECT ?, ?, ?, ?, ?, 1, NOW(), NOW()
+        FROM DUAL
+        WHERE NOT EXISTS (
+          SELECT 1 FROM usuarios WHERE username = ?
+        )
+      `, [
+        row.username,
+        row.email,
+        nombreCompleto,
+        rol,
+        row.cod_profesional || '',
+        row.username
+      ]);
+
+      console.log('✅ Importado:', row.username);
     }
 
-    console.log('✅ Importación finalizada');
+    await wpConn.end();
+    await abmConn.end();
+    console.log('\n✅✅ Importación finalizada correctamente');
     process.exit(0);
 
   } catch (err) {
-    console.error('❌ Error:', err);
+    console.error('❌ Error general:', err);
     process.exit(1);
   }
 }
