@@ -4,8 +4,15 @@ const { syncToSuite, actualizarClave } = require('../services/suiteSyncService')
 exports.crearUsuario = async (req, res) => {
   try {
     const datos = req.body;
+
+    // Agregar alias si no viene (usa username como valor por defecto)
+    if (!datos.alias) {
+      datos.alias = datos.username;
+    }
+
     await syncToWordpress(datos);
     await syncToSuite(datos);
+
     res.status(201).json({ mensaje: 'Usuario creado correctamente' });
   } catch (error) {
     console.error('Error creando usuario:', error);
