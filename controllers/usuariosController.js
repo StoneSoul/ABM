@@ -1,5 +1,5 @@
 const { syncToWordpress } = require('../services/wpSyncService');
-const { syncToSuite } = require('../services/suiteSyncService');
+const { syncToSuite, actualizarClave } = require('../services/suiteSyncService');
 
 exports.crearUsuario = async (req, res) => {
   try {
@@ -21,5 +21,16 @@ exports.modificarUsuario = async (req, res) => {
     res.json({ mensaje: 'Usuario modificado correctamente' });
   } catch (error) {
     res.status(500).json({ error: 'Error al modificar usuario' });
+  }
+};
+
+exports.passwordCambiadaDesdeWp = async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    await actualizarClave({ username, password });
+    res.json({ mensaje: 'Clave actualizada en Suite' });
+  } catch (error) {
+    console.error('Error actualizando clave desde WP:', error);
+    res.status(500).json({ error: 'Error actualizando clave' });
   }
 };
