@@ -38,6 +38,7 @@
         <th onclick="ordenar(4)">Código Profesional</th>
         <th onclick="ordenar(5)">Estado</th>
         <th>Acción</th>
+        <th>Editar</th>
       </tr>
     </thead>
     <tbody id="contenidoTabla"></tbody>
@@ -59,7 +60,7 @@
           <td>${u.rol}</td>
           <td>${u.cod_profesional}</td>
           <td>${u.estado === 1 ? 'Activo' : 'Inactivo'}</td>
-          <td><button onclick="toggleEstado('${u.username}', ${u.estado})">${u.estado === 1 ? 'Deshabilitar' : 'Habilitar'}</button></td>
+          <td><button onclick="toggleEstado('${u.username}', ${u.estado})">${u.estado === 1 ? 'Deshabilitar' : 'Habilitar'}</button></td> <td><button onclick="editarUsuario('${u.username}')">Editar</button></td>
         `;
         tbody.appendChild(fila);
       }
@@ -100,6 +101,9 @@
       filas.forEach(f => tbody.appendChild(f));
     }
 
+    function editarUsuario(username) {
+      window.location.href = `modificar.html?username=${username}`;
+    }
     cargarUsuarios();
   </script>
 </body>

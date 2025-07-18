@@ -27,3 +27,15 @@ exports.syncToWordpress = async ({
     throw error;
   }
 };
+
+exports.actualizarEstado = async ({ username, estado }) => {
+  try {
+    await axios.post(`${WP_API}/update-user-status`, {
+      username,
+      estado,
+    });
+  } catch (error) {
+    console.error('Error actualizando estado en WordPress:', error.response?.data || error);
+    throw error;
+  }
+};

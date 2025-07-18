@@ -1,6 +1,6 @@
 const mysql = require('mysql2/promise');
-const { syncToWordpress } = require('../services/wpSyncService');
-const { syncToSuite, actualizarClave } = require('../services/suiteSyncService');
+const { syncToWordpress, actualizarEstado: actualizarEstadoWp } = require('../services/wpSyncService');
+const { syncToSuite, actualizarClave, actualizarEstado: actualizarEstadoSuite } = require('../services/suiteSyncService');
 
 exports.crearUsuario = async (req, res, next) => {
   try {
@@ -81,6 +81,8 @@ exports.cambiarEstado = async (req, res, next) => {
       'UPDATE usuarios SET estado = ? WHERE username = ?',
       [estado, username]
     );
+    await actualizarEstadoWp({ username, estado });
+    await actualizarEstadoSuite({ username, estado });
     res.json({ mensaje: 'Estado actualizado' });
     await connection.end();
   } catch (error) {
