@@ -2,7 +2,7 @@ const sql = require('mssql');
 const { syncToWordpress } = require('../services/wpSyncService');
 const { syncToSuite, actualizarClave } = require('../services/suiteSyncService');
 
-exports.crearUsuario = async (req, res) => {
+exports.crearUsuario = async (req, res, next) => {
   try {
     const datos = req.body;
 
@@ -16,34 +16,34 @@ exports.crearUsuario = async (req, res) => {
     res.status(201).json({ mensaje: 'Usuario creado correctamente' });
   } catch (error) {
     console.error('Error creando usuario:', error);
-    res.status(500).json({ error: 'Error al crear usuario' });
+    next(error);
   }
 };
 
-exports.modificarUsuario = async (req, res) => {
+exports.modificarUsuario = async (req, res, next) => {
   try {
     const datos = req.body;
     await syncToWordpress(datos);
     await syncToSuite(datos);
     res.json({ mensaje: 'Usuario modificado correctamente' });
   } catch (error) {
-    res.status(500).json({ error: 'Error al modificar usuario' });
+    next(error);
   }
 };
 
-exports.passwordCambiadaDesdeWp = async (req, res) => {
+exports.passwordCambiadaDesdeWp = async (req, res, next) => {
   try {
     const { username, password } = req.body;
     await actualizarClave({ username, password });
     res.json({ mensaje: 'Clave actualizada en Suite' });
   } catch (error) {
     console.error('Error actualizando clave desde WP:', error);
-    res.status(500).json({ error: 'Error actualizando clave' });
+    next(error);
   }
 };
 
 // ✅ NUEVA FUNCIÓN PARA LISTAR USUARIOS
-exports.listarUsuarios = async (req, res) => {
+exports.listarUsuarios = async (req, res, next) => {
   try {
     const pool = await sql.connect({
       user: process.env.DB_USER,
@@ -66,6 +66,6 @@ exports.listarUsuarios = async (req, res) => {
     pool.close();
   } catch (error) {
     console.error('❌ Error al listar usuarios:', error);
-    res.status(500).json({ error: 'Error interno al obtener usuarios' });
+    next(error);
   }
 };
