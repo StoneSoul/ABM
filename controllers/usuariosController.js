@@ -63,6 +63,7 @@ exports.listarUsuarios = async (req, res) => {
     `);
 
     res.json(result.recordset);
+    pool.close();
   } catch (error) {
     console.error('❌ Error al listar usuarios:', error);
     res.status(500).json({ error: 'Error interno al obtener usuarios' });
