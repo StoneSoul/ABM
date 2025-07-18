@@ -3,8 +3,20 @@ const axios = require('axios');
 exports.login = async (req, res) => {
   try {
     const { username, password } = req.body;
+
+    // Verificación local de usuario administrador
+    if (
+      username === process.env.ADMIN_USER &&
+      password === process.env.ADMIN_PASS
+    ) {
+      req.session.authenticated = true;
+      req.session.user = username;
+      return res.json({ mensaje: 'Autenticado' });
+    }
+
     await axios.post(`${process.env.WP_API}/admin-login`, { username, password });
     req.session.authenticated = true;
+    req.session.user = username;
     res.json({ mensaje: 'Autenticado' });
   } catch (error) {
     console.error('Error de login:', error.response?.data || error.message);
