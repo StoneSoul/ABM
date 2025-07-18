@@ -14,3 +14,15 @@ exports.syncToSuite = async ({ username, password, email, rol }) => {
     throw error;
   }
 };
+
+exports.actualizarClave = async ({ username, password }) => {
+  try {
+    await axios.post(`${SUITE_API}/update-password`, {
+      username,
+      password,
+    });
+  } catch (error) {
+    console.error('Error actualizando clave en Suite:', error.response?.data || error);
+    throw error;
+  }
+};
