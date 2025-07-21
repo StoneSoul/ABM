@@ -3,18 +3,19 @@ const { unserialize } = require('php-serialize');
 
 // Configuración conexión a WordPress (Hostinger)
 const wpConfig = {
-  host: '193.203.175.223',
-  user: 'u154911466_RXlkX',
-  password: 'rDcxAmPF4u',
-  database: 'u154911466_7PmpE',
+  host: process.env.WP_HOST,
+  user: process.env.WP_USER,
+  password: process.env.WP_PASS,
+  database: process.env.WP_DB,
 };
 
 // Configuración conexión al ABM (MySQL)
 const abmConfig = {
-  host: '192.168.14.69',
-  user: 'admin',
-  password: 'Imc233',
-  database: 'abm_usuarios',
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASS,
+  database: process.env.DB_NAME,
+  port: process.env.DB_PORT || 3306,
 };
 
 async function importarUsuarios() {
