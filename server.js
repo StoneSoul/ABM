@@ -34,4 +34,11 @@ app.get('/', (req, res) => res.redirect('/login.html'));
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => console.log(`Servidor ABM corriendo en puerto ${PORT}`));
+// Mostrar el puerto solo en modo debug para no contaminar los logs de producción
+if (process.env.DEBUG) {
+  app.listen(PORT, () =>
+    console.log(`Servidor ABM corriendo en puerto ${PORT}`)
+  );
+} else {
+  app.listen(PORT);
+}
