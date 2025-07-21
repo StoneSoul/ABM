@@ -7,6 +7,7 @@ const {
   validar,
 } = require('../middlewares/usuariosValidation');
 const auth = require('../middlewares/authMiddleware');
+const wpToken = require('../middlewares/wpTokenMiddleware');
 
 router.post(
   '/crear',
@@ -22,7 +23,7 @@ router.post(
   validar,
   usuariosController.modificarUsuario
 );
-router.post('/wp-password-change', auth, usuariosController.passwordCambiadaDesdeWp);
+router.post('/wp-password-change', wpToken, usuariosController.passwordCambiadaDesdeWp);
 router.post('/estado', auth, usuariosController.cambiarEstado);
 router.get('/', auth, usuariosController.listarUsuarios);
 
