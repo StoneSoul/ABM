@@ -109,7 +109,12 @@ function abm_update_user_status($request) {
 // Notificar cambios de contraseña al ABM externo
 add_action('after_password_reset', 'abm_notify_password_change', 10, 2);
 function abm_notify_password_change($user, $new_pass) {
-    $url = 'http://tu-servidor-abm/api/usuarios/wp-password-change'; // Reemplazar por URL real
+    // Obtiene la URL base desde la constante ABM_API_URL o desde la opción de WordPress
+    $base_url = defined('ABM_API_URL') ? ABM_API_URL : get_option('abm_api_url', 'https://tu-servidor-abm');
+    if (!$base_url) {
+        return; // No se envía la notificación si no hay URL configurada
+    }
+    $url = rtrim($base_url, '/') . '/api/usuarios/wp-password-change';
 
     $args = [
         'body' => json_encode([
