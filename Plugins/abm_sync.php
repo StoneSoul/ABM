@@ -120,6 +120,16 @@ function abm_notify_password_change($user, $new_pass) {
     wp_remote_post($url, $args);
 }
 
+// Bloquear inicio de sesión si el usuario tiene user_status = 1
+add_filter('wp_authenticate_user', 'abm_block_disabled_users', 10, 2);
+function abm_block_disabled_users($user, $password) {
+    if (!empty($user->user_status) && (int) $user->user_status === 1) {
+        return new WP_Error('abm_user_disabled', 'Su usuario no est\xc3\xa1 habilitado');
+    }
+
+    return $user;
+}
+
 /*
  // OPCIONAL: Validar autenticación por token
 function abm_permission_check($request) {
