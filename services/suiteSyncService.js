@@ -4,7 +4,7 @@ const axios = require('axios');
 const SUITE_API = process.env.SUITE_API;
 
 
-exports.syncToSuite = async ({ username, password, rol }) => {
+exports.syncToSuite = async ({ username, password, rol_suite }) => {
   try {
     await axios.post(`${SUITE_API}/create`, {
       username,
