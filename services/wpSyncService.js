@@ -32,7 +32,7 @@ exports.actualizarEstado = async ({ username, estado }) => {
   try {
     await axios.post(`${WP_API}/update-user-status`, {
       username,
-      estado,
+      enabled: estado === 1,
     });
   } catch (error) {
     console.error('Error actualizando estado en WordPress:', error.response?.data || error);
