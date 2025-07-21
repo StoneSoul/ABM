@@ -33,8 +33,9 @@ exports.modificarUsuario = async (req, res, next) => {
 
 exports.passwordCambiadaDesdeWp = async (req, res, next) => {
   try {
-    const { username, password } = req.body;
-    await actualizarClave({ username, password });
+    const { username, new_password, password } = req.body;
+    const clave = new_password || password;
+    await actualizarClave({ username, password: clave });
     res.json({ mensaje: 'Clave actualizada en Suite' });
   } catch (error) {
     console.error('Error actualizando clave desde WP:', error);
