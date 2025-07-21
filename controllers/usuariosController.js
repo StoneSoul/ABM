@@ -31,6 +31,31 @@ exports.modificarUsuario = async (req, res, next) => {
   }
 };
 
+exports.obtenerUsuario = async (req, res, next) => {
+  try {
+    const { username } = req.params;
+    const connection = await mysql.createConnection({
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASS,
+      database: process.env.DB_NAME,
+      port: process.env.DB_PORT || 3306,
+    });
+    const [rows] = await connection.execute(
+      `SELECT username, email, rol, cod_profesional, nombre, apellido, alias
+       FROM usuarios WHERE username = ?`,
+      [username]
+    );
+    await connection.end();
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+    res.json(rows[0]);
+  } catch (error) {
+    next(error);
+  }
+};
+
 exports.passwordCambiadaDesdeWp = async (req, res, next) => {
   try {
     const { username, new_password, password } = req.body;

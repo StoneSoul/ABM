@@ -25,6 +25,7 @@ router.post(
 );
 router.post('/wp-password-change', wpToken, usuariosController.passwordCambiadaDesdeWp);
 router.post('/estado', auth, usuariosController.cambiarEstado);
+router.get('/:username', auth, usuariosController.obtenerUsuario);
 router.get('/', auth, usuariosController.listarUsuarios);
 
 module.exports = router;
