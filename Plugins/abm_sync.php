@@ -86,6 +86,12 @@ function abm_admin_login($request) {
 function abm_update_user_status($request) {
     $params = $request->get_json_params();
     $username = sanitize_user($params['username']);
+
+    // Si falta "enabled" se avisa al ABM y no se actualiza el meta
+    if (!isset($params['enabled'])) {
+        return new WP_Error('missing_param', 'Falta el parámetro enabled', ['status' => 400]);
+    }
+
     $enabled = filter_var($params['enabled'], FILTER_VALIDATE_BOOLEAN);
 
     $user = get_user_by('login', $username);
@@ -93,7 +99,9 @@ function abm_update_user_status($request) {
         return new WP_Error('not_found', 'Usuario no encontrado', ['status' => 404]);
     }
 
-    update_user_meta($user->ID, 'abm_enabled', $enabled ? 1 : 0);
+    if (isset($params['enabled'])) {
+        update_user_meta($user->ID, 'abm_enabled', $enabled ? 1 : 0);
+    }
 
     return rest_ensure_response(['mensaje' => 'Estado actualizado correctamente']);
 }
