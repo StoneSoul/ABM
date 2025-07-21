@@ -98,12 +98,16 @@
 
     async function toggleEstado(username, estado) {
       const nuevo = estado === 1 ? 0 : 1;
-      await fetch('/api/usuarios/estado', {
+      const res = await fetch('/api/usuarios/estado', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, estado: nuevo })
       });
-      cargarUsuarios();
+      if (res.ok) {
+        cargarUsuarios();
+      } else {
+        alert('No se pudo cambiar el estado');
+      }
     }
 
     document.getElementById('buscador').addEventListener('input', function() {
