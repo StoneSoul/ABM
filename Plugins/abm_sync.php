@@ -2,7 +2,7 @@
 /**
  * Plugin Name: ABM Sync
  * Description: Recibe usuarios desde el ABM externo y los sincroniza correctamente.
- * Version: 1.3
+ * Version: 1.4
  */
 
 add_action('rest_api_init', function () {
@@ -63,6 +63,7 @@ function abm_create_user($request) {
     }
 
     update_user_meta($user_id, 'professional_code', $codigos);
+    update_user_meta($user_id, 'abm_enabled', 1); // Por defecto: habilitado
 
     return rest_ensure_response(['mensaje' => 'Usuario creado correctamente']);
 }
@@ -81,7 +82,7 @@ function abm_admin_login($request) {
     return rest_ensure_response(['mensaje' => 'Login exitoso']);
 }
 
-// Actualizar estado activo/inactivo del usuario
+// Actualizar estado habilitado/deshabilitado del usuario (vía ABM)
 function abm_update_user_status($request) {
     $params = $request->get_json_params();
     $username = sanitize_user($params['username']);
@@ -92,11 +93,7 @@ function abm_update_user_status($request) {
         return new WP_Error('not_found', 'Usuario no encontrado', ['status' => 404]);
     }
 
-    // Desactivar => establecer user_status = 1, Activar => 0
-    wp_update_user([
-        'ID' => $user->ID,
-        'user_status' => $enabled ? 0 : 1
-    ]);
+    update_user_meta($user->ID, 'abm_enabled', $enabled ? 1 : 0);
 
     return rest_ensure_response(['mensaje' => 'Estado actualizado correctamente']);
 }
@@ -104,7 +101,7 @@ function abm_update_user_status($request) {
 // Notificar cambios de contraseña al ABM externo
 add_action('after_password_reset', 'abm_notify_password_change', 10, 2);
 function abm_notify_password_change($user, $new_pass) {
-    $url = 'http://tu-servidor-abm/api/usuarios/wp-password-change'; // REEMPLAZAR por URL real
+    $url = 'http://tu-servidor-abm/api/usuarios/wp-password-change'; // Reemplazar por URL real
 
     $args = [
         'body' => json_encode([
@@ -120,11 +117,12 @@ function abm_notify_password_change($user, $new_pass) {
     wp_remote_post($url, $args);
 }
 
-// Bloquear inicio de sesión si el usuario tiene user_status = 1
+// Bloquear inicio de sesión si el usuario tiene abm_enabled = 0
 add_filter('wp_authenticate_user', 'abm_block_disabled_users', 10, 2);
 function abm_block_disabled_users($user, $password) {
-    if (!empty($user->user_status) && (int) $user->user_status === 1) {
-        return new WP_Error('abm_user_disabled', 'Su usuario no est\xc3\xa1 habilitado');
+    $enabled = get_user_meta($user->ID, 'abm_enabled', true);
+    if ($enabled === '0') {
+        return new WP_Error('abm_user_disabled', 'Su usuario no está habilitado');
     }
 
     return $user;
