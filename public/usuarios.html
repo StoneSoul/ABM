@@ -53,15 +53,45 @@
 
       for (const u of datos) {
         const fila = document.createElement('tr');
-        fila.innerHTML = `
-          <td>${u.username}</td>
-          <td>${u.email}</td>
-          <td>${u.nombre_completo}</td>
-          <td>${u.rol}</td>
-          <td>${u.cod_profesional}</td>
-          <td>${u.estado === 1 ? 'Activo' : 'Inactivo'}</td>
-          <td><button onclick="toggleEstado('${u.username}', ${u.estado})">${u.estado === 1 ? 'Deshabilitar' : 'Habilitar'}</button></td> <td><button onclick="editarUsuario('${u.username}')">Editar</button></td>
-        `;
+
+        const username = document.createElement('td');
+        username.textContent = u.username;
+        fila.appendChild(username);
+
+        const email = document.createElement('td');
+        email.textContent = u.email;
+        fila.appendChild(email);
+
+        const nombreCompleto = document.createElement('td');
+        nombreCompleto.textContent = u.nombre_completo;
+        fila.appendChild(nombreCompleto);
+
+        const rol = document.createElement('td');
+        rol.textContent = u.rol;
+        fila.appendChild(rol);
+
+        const codProfesional = document.createElement('td');
+        codProfesional.textContent = u.cod_profesional;
+        fila.appendChild(codProfesional);
+
+        const estado = document.createElement('td');
+        estado.textContent = u.estado === 1 ? 'Activo' : 'Inactivo';
+        fila.appendChild(estado);
+
+        const accion = document.createElement('td');
+        const btnEstado = document.createElement('button');
+        btnEstado.textContent = u.estado === 1 ? 'Deshabilitar' : 'Habilitar';
+        btnEstado.onclick = () => toggleEstado(u.username, u.estado);
+        accion.appendChild(btnEstado);
+        fila.appendChild(accion);
+
+        const editar = document.createElement('td');
+        const btnEditar = document.createElement('button');
+        btnEditar.textContent = 'Editar';
+        btnEditar.onclick = () => editarUsuario(u.username);
+        editar.appendChild(btnEditar);
+        fila.appendChild(editar);
+
         tbody.appendChild(fila);
       }
     }
