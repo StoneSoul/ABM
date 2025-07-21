@@ -36,8 +36,9 @@
         <th onclick="ordenar(1)">Email</th>
         <th onclick="ordenar(2)">Nombre completo</th>
         <th onclick="ordenar(3)">Rol_WP</th>
-        <th onclick="ordenar(4)">Código Profesional</th>
-        <th onclick="ordenar(5)">Estado</th>
+        <th onclick="ordenar(4)">Rol_Suite</th>
+        <th onclick="ordenar(5)">Código Profesional</th>
+        <th onclick="ordenar(6)">Estado</th>
         <th>Acción</th>
         <th>Editar</th>
       </tr>
@@ -70,6 +71,10 @@
         const rol = document.createElement('td');
         rol.textContent = u.rol;
         fila.appendChild(rol);
+
+        const rol_suite = document.createElement('td');
+        rol_suite.textContent = u.rol_suite;
+        fila.appendChild(rol_suite);
 
         const codProfesional = document.createElement('td');
         codProfesional.textContent = u.cod_profesional;

@@ -16,6 +16,7 @@ router.post(
   validar,
   usuariosController.crearUsuario
 );
+
 router.post(
   '/modificar',
   auth,

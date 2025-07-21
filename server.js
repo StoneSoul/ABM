@@ -40,5 +40,5 @@ if (process.env.DEBUG) {
     console.log(`Servidor ABM corriendo en puerto ${PORT}`)
   );
 } else {
-  app.listen(PORT);
+  app.listen(PORT, '0.0.0.0');
 }

@@ -1,13 +1,15 @@
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '../.env') });
 const axios = require('axios');
 const SUITE_API = process.env.SUITE_API;
 
-exports.syncToSuite = async ({ username, password, email, rol }) => {
+
+exports.syncToSuite = async ({ username, password, rol }) => {
   try {
     await axios.post(`${SUITE_API}/create`, {
       username,
       password,
-      email,
-      rol,
+      rol_suite,
     });
   } catch (error) {
     console.error('Error sincronizando con Suite:', error.response?.data || error);

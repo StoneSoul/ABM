@@ -1,5 +1,8 @@
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '../.env') });
 const axios = require('axios');
 const WP_API = process.env.WP_API;
+
 
 exports.syncToWordpress = async ({
   username,
