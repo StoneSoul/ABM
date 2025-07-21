@@ -13,12 +13,10 @@
   "type": "commonjs",
   "dependencies": {
     "axios": "*",
-    "body-parser": "*",
     "dotenv": "*",
     "express": "*",
     "express-session": "^1.18.2",
     "express-validator": "*",
-    "mssql": "*",
     "mysql2": "*",
     "php-serialize": "*"
   }
