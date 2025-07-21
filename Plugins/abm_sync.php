@@ -121,12 +121,16 @@ function abm_notify_password_change($user, $new_pass) {
 add_filter('wp_authenticate_user', 'abm_block_disabled_users', 10, 2);
 function abm_block_disabled_users($user, $password) {
     $enabled = get_user_meta($user->ID, 'abm_enabled', true);
+
+    error_log('ABM habilitado: ' . $enabled); // 🔍 Este log lo ves en el server
+
     if ($enabled === '0') {
         return new WP_Error('abm_user_disabled', 'Su usuario no está habilitado');
     }
 
     return $user;
 }
+
 
 /*
  // OPCIONAL: Validar autenticación por token
