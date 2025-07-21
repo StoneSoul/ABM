@@ -131,6 +131,46 @@ function abm_block_disabled_users($user, $password) {
     return $user;
 }
 
+// Agrega una página al admin para ver el estado abm_enabled
+add_action('admin_menu', 'abm_admin_menu');
+
+function abm_admin_menu() {
+    add_menu_page(
+        'Estado ABM',
+        'Estado ABM',
+        'manage_options',
+        'estado-abm',
+        'abm_estado_admin_page',
+        'dashicons-admin-users',
+        80
+    );
+}
+
+function abm_estado_admin_page() {
+    echo '<div class="wrap"><h1>Consulta de estado ABM</h1>';
+
+    if (isset($_POST['abm_check_user'])) {
+        $username = sanitize_user($_POST['username']);
+        $user = get_user_by('login', $username);
+
+        if ($user) {
+            $enabled = get_user_meta($user->ID, 'abm_enabled', true);
+            echo "<p><strong>Usuario:</strong> {$username}</p>";
+            echo "<p><strong>abm_enabled:</strong> " . ($enabled !== '' ? $enabled : '<em>(no definido)</em>') . "</p>";
+        } else {
+            echo "<p style='color:red;'>Usuario no encontrado</p>";
+        }
+    }
+
+    echo '<form method="post">';
+    echo '<label for="username">Nombre de usuario:</label><br>';
+    echo '<input type="text" name="username" id="username" required><br><br>';
+    echo '<input type="submit" name="abm_check_user" value="Consultar estado">';
+    echo '</form>';
+    echo '</div>';
+}
+
+
 
 /*
  // OPCIONAL: Validar autenticación por token
