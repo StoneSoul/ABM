@@ -65,4 +65,4 @@ Por defecto el servidor queda escuchando en el puerto indicado por `PORT`.
 
 - `npm install` &ndash; Instala todas las dependencias declaradas en `package.json`.
 - `npm start` &ndash; Inicia el servidor utilizando `node server.js`.
-
+- `pm2 start ecosystem.config.cjs` &ndash; Ejecuta el servidor con [PM2](https://pm2.keymetrics.io/) usando la configuración definida en `ecosystem.config.cjs`. Esta configuración está preparada para reiniciar el proceso automáticamente cuando se modifican los archivos.
