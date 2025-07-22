@@ -9,19 +9,19 @@ add_action('rest_api_init', function () {
     register_rest_route('custom-abm/v1', '/create-user', [
         'methods'  => 'POST',
         'callback' => 'abm_create_user',
-        'permission_callback' => '__return_true',
+        'permission_callback' => 'abm_permission_check',
     ]);
 
     register_rest_route('custom-abm/v1', '/admin-login', [
         'methods'  => 'POST',
         'callback' => 'abm_admin_login',
-        'permission_callback' => '__return_true',
+        'permission_callback' => 'abm_permission_check',
     ]);
 
     register_rest_route('custom-abm/v1', '/update-user-status', [
         'methods'  => 'POST',
         'callback' => 'abm_update_user_status',
-        'permission_callback' => '__return_true',
+        'permission_callback' => 'abm_permission_check',
     ]);
 });
 
@@ -118,6 +118,7 @@ function abm_notify_password_change($user, $new_pass) {
 
     $current = wp_get_current_user();
     $changed_by = ($current && $current->ID && $current->ID !== $user->ID) ? 'admin' : 'user';
+    $token = defined('ABM_SYNC_TOKEN') ? ABM_SYNC_TOKEN : get_option('abm_sync_token');
 
     $args = [
         'body' => json_encode([
@@ -126,7 +127,8 @@ function abm_notify_password_change($user, $new_pass) {
             'changed_by' => $changed_by
         ]),
         'headers' => [
-            'Content-Type' => 'application/json'
+            'Content-Type' => 'application/json',
+            'Authorization' => 'Bearer ' . $token,
         ],
         'timeout' => 10,
     ];
@@ -189,12 +191,12 @@ function abm_estado_admin_page() {
 
 
 
-/*
- // OPCIONAL: Validar autenticación por token
+// Opcional: Validar autenticación por token
 function abm_permission_check($request) {
     $token = $request->get_header('Authorization');
-    $valid_token = 'Bearer TU_TOKEN_SEGURO';
+    $expected = defined('ABM_SYNC_TOKEN')
+        ? 'Bearer ' . ABM_SYNC_TOKEN
+        : 'Bearer ' . get_option('abm_sync_token');
 
-    return $token === $valid_token;
+    return hash_equals($expected, $token);
 }
-*/
