@@ -22,38 +22,51 @@
     </table>
   </main>
   <div id="footer-placeholder"></div>
+
   <script>
+    function formatearFechaSimple(fechaStr) {
+      if (!fechaStr || typeof fechaStr !== 'string') return '—';
+      
+      // Acepta "2025-07-22 12:44:34" o "2025-07-22T12:44:34.000Z"
+      const cleanStr = fechaStr.includes('T') ? fechaStr.replace('T', ' ').split('.')[0] : fechaStr;
+      
+      const [fecha, hora] = cleanStr.split(' ');
+      if (!fecha || !hora) return fechaStr;
+
+      const [a, m, d] = fecha.split('-');
+      return `${d}/${m}/${a} - ${hora}`;
+    }
+
     async function cargarRegistros() {
       const q = document.getElementById('buscadorReg').value;
       const res = await fetch('/api/registros' + (q ? ('?q=' + encodeURIComponent(q)) : ''));
       const datos = await res.json();
       const tbody = document.querySelector('#tablaRegistros tbody');
       tbody.innerHTML = '';
+
       for (const r of datos) {
         const fila = document.createElement('tr');
-  
+
         const username = document.createElement('td');
         username.textContent = r.username;
         fila.appendChild(username);
-  
+
         const by = document.createElement('td');
         by.textContent = r.changed_by;
         fila.appendChild(by);
-  
+
         const fecha = document.createElement('td');
-        const fechaObj = new Date(r.changed_at);
-        const pad = n => n.toString().padStart(2, '0');
-        const fechaFormateada = `${pad(fechaObj.getDate())}/${pad(fechaObj.getMonth() + 1)}/${fechaObj.getFullYear()} - ${pad(fechaObj.getHours())}:${pad(fechaObj.getMinutes())}:${pad(fechaObj.getSeconds())}`;
-        fecha.textContent = fechaFormateada;
+        fecha.textContent = formatearFechaSimple(r.changed_at);
         fila.appendChild(fecha);
-  
+
         tbody.appendChild(fila);
       }
     }
-  
+
     document.getElementById('buscadorReg').addEventListener('input', cargarRegistros);
     cargarRegistros();
   </script>
+
   <script src="header.js"></script>
   <script src="logout.js"></script>
 </body>
