@@ -81,6 +81,7 @@ Cada vez que WordPress notifica un cambio de clave se inserta un registro indica
 - `npm install` – Instala todas las dependencias declaradas en `package.json`.  
 - `npm start` – Inicia el servidor utilizando `node server.js`.  
 - `pm2 start ecosystem.config.cjs` – Ejecuta el servidor con [PM2](https://pm2.keymetrics.io/) usando la configuración definida en `ecosystem.config.cjs`. Esta configuración está preparada para reiniciar el proceso automáticamente cuando se modifican los archivos.
+
 ## Sincronización de cambios desde WordPress
 
 Cuando el ABM no está disponible, WordPress guarda en cada usuario la fecha del
