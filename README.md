@@ -81,3 +81,11 @@ Cada vez que WordPress notifica un cambio de clave se inserta un registro indica
 - `npm install` – Instala todas las dependencias declaradas en `package.json`.  
 - `npm start` – Inicia el servidor utilizando `node server.js`.  
 - `pm2 start ecosystem.config.cjs` – Ejecuta el servidor con [PM2](https://pm2.keymetrics.io/) usando la configuración definida en `ecosystem.config.cjs`. Esta configuración está preparada para reiniciar el proceso automáticamente cuando se modifican los archivos.
+## Sincronización de cambios desde WordPress
+
+Cuando el ABM no está disponible, WordPress guarda en cada usuario la fecha del
+último cambio de contraseña y quién lo realizó mediante los metadatos
+`abm_last_pwd_change` y `abm_last_pwd_changed_by`. El script
+`services/checkWpPasswordChanges.js` consulta esos valores directamente en la
+base de datos de WordPress e inserta en `password_logs` solamente los cambios
+que aún no fueron registrados en el ABM.

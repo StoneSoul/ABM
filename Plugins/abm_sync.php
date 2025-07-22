@@ -2,8 +2,9 @@
 /**
  * Plugin Name: ABM Sync
  * Description: Recibe usuarios desde el ABM externo y los sincroniza correctamente.
- * Version: 1.4
- */
+ * Version: 1.6
+*/
+
 
 add_action('rest_api_init', function () {
     register_rest_route('custom-abm/v1', '/create-user', [
@@ -107,7 +108,7 @@ function abm_update_user_status($request) {
 }
 
 // Notificar cambios de contraseña al ABM externo
-add_action('after_password_reset', 'abm_notify_password_change', 10, 2);
+add_action('password_reset', 'abm_notify_password_change', 10, 2);
 function abm_notify_password_change($user, $new_pass) {
     // Obtiene la URL base desde la constante ABM_API_URL o desde la opción de WordPress
     $base_url = defined('ABM_API_URL') ? ABM_API_URL : get_option('abm_api_url', 'https://tu-servidor-abm');
@@ -134,6 +135,10 @@ function abm_notify_password_change($user, $new_pass) {
     ];
 
     wp_remote_post($url, $args);
+
+    // Guardar la fecha y quién realizó el cambio para que el ABM pueda consultarlo
+    update_user_meta($user->ID, 'abm_last_pwd_change', current_time('mysql'));
+    update_user_meta($user->ID, 'abm_last_pwd_changed_by', $changed_by);
 }
 
 // Bloquear inicio de sesión si el usuario tiene abm_enabled = 0
