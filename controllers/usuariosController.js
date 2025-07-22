@@ -2,6 +2,21 @@ const mysql = require('mysql2/promise');
 const { syncToWordpress, actualizarEstado: actualizarEstadoWp } = require('../services/wpSyncService');
 const { syncToSuite, actualizarClave, actualizarEstado: actualizarEstadoSuite } = require('../services/suiteSyncService');
 
+async function registrarCambioClave(username, changedBy) {
+  const connection = await mysql.createConnection({
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASS,
+    database: process.env.DB_NAME,
+    port: process.env.DB_PORT || 3306,
+  });
+  await connection.execute(
+    'INSERT INTO password_logs (username, changed_by, changed_at) VALUES (?, ?, NOW())',
+    [username, changedBy]
+  );
+  await connection.end();
+}
+
 exports.crearUsuario = async (req, res, next) => {
   try {
     const datos = req.body;
@@ -25,6 +40,9 @@ exports.modificarUsuario = async (req, res, next) => {
     const datos = req.body;
     await syncToWordpress(datos);
     await syncToSuite(datos);
+    if (datos.password) {
+      await registrarCambioClave(datos.username, 'admin');
+    }
     res.json({ mensaje: 'Usuario modificado correctamente' });
   } catch (error) {
     next(error);
@@ -58,9 +76,10 @@ exports.obtenerUsuario = async (req, res, next) => {
 
 exports.passwordCambiadaDesdeWp = async (req, res, next) => {
   try {
-    const { username, new_password, password } = req.body;
+    const { username, new_password, password, changed_by } = req.body;
     const clave = new_password || password;
     await actualizarClave({ username, password: clave });
+    await registrarCambioClave(username, changed_by || 'user');
     res.json({ mensaje: 'Clave actualizada en Suite' });
   } catch (error) {
     console.error('Error actualizando clave desde WP:', error);

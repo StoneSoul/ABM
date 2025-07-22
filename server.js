@@ -3,6 +3,7 @@ const path = require('path');
 const session = require('express-session');
 const usuariosRouter = require('./routes/usuarios');
 const authRouter = require('./routes/auth');
+const registrosRouter = require('./routes/registros');
 const errorHandler = require('./middlewares/errorHandler');
 
 const ensureLoggedIn = (req, res, next) => {
@@ -30,6 +31,7 @@ app.use(ensureLoggedIn);
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/api/auth', authRouter);
 app.use('/api/usuarios', usuariosRouter);
+app.use('/api/registros', registrosRouter);
 app.get('/', (req, res) => res.redirect('/login.html'));
 app.use(errorHandler);
 
