@@ -1,4 +1,6 @@
 const mysql = require('mysql2/promise');
+const axios = require('axios');
+const SUITE_API = process.env.SUITE_API;
 const { syncToWordpress, actualizarEstado: actualizarEstadoWp } = require('../services/wpSyncService');
 const { syncToSuite, actualizarClave, actualizarEstado: actualizarEstadoSuite } = require('../services/suiteSyncService');
 
@@ -70,6 +72,28 @@ exports.obtenerUsuario = async (req, res, next) => {
     }
     res.json(rows[0]);
   } catch (error) {
+    next(error);
+  }
+};
+
+exports.obtenerRolesSuite = async (req, res, next) => {
+  try {
+    const connection = await mysql.createConnection({
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASS,
+      database: process.env.DB_NAME_SUITE,
+      port: process.env.DB_PORT || 3306
+    });
+    
+    const [rows] = await connection.execute(
+      `SELECT idrol AS value, CONCAT(idrol, ' : ', nombre) AS label, 'idrol' AS name FROM imc_suite_prueba.rol`
+    );
+
+    res.json(rows);
+    await connection.end();
+  } catch (error) {
+    console.error('❌ Error al obtener roles:', error);
     next(error);
   }
 };

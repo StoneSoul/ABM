@@ -14,8 +14,9 @@
     <input type="password" name="password" placeholder="Clave" required><br>
     <input type="email" name="email" placeholder="Email" required><br>
     <input type="text" name="rol" value="subscriber" readonly><br>
-    <input type="text" name="rol_suite" placeholder="Rol_Suite"><br>
-    <input type="text" name="cod_profesional" placeholder="Código profesional"><br>
+    <select name="rol_suite" id="rol_suite" required>
+      <option value="">Cargando roles...</option>
+    </select><br>    <input type="text" name="cod_profesional" placeholder="Código profesional"><br>
     <input type="text" name="nombre" placeholder="Nombre"><br>
     <input type="text" name="apellido" placeholder="Apellido"><br>
     <input type="text" name="alias" placeholder="Alias"><br>
@@ -23,21 +24,27 @@
   </form>
   </main>
   <div id="footer-placeholder"></div>
-  <script>
-    document.getElementById('crearForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const data = Object.fromEntries(new FormData(e.target).entries());
-      const res = await fetch('/api/usuarios/crear', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
+  <script type="module">
+    import { cargarRolesSuite } from './cargarRolesSuite.js';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      cargarRolesSuite();
+
+      document.getElementById('crearForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const data = Object.fromEntries(new FormData(e.target).entries());
+        const res = await fetch('/api/usuarios/crear', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        if (res.ok) {
+          alert('Usuario creado');
+          e.target.reset();
+        } else {
+          alert('Error al crear');
+        }
       });
-      if (res.ok) {
-        alert('Usuario creado');
-        e.target.reset();
-      } else {
-        alert('Error al crear');
-      }
     });
   </script>
   <script src="header.js"></script>
