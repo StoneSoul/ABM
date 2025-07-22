@@ -31,18 +31,26 @@
       tbody.innerHTML = '';
       for (const r of datos) {
         const fila = document.createElement('tr');
+  
         const username = document.createElement('td');
         username.textContent = r.username;
         fila.appendChild(username);
+  
         const by = document.createElement('td');
         by.textContent = r.changed_by;
         fila.appendChild(by);
+  
         const fecha = document.createElement('td');
-        fecha.textContent = new Date(r.changed_at).toLocaleString();
+        const fechaObj = new Date(r.changed_at);
+        const pad = n => n.toString().padStart(2, '0');
+        const fechaFormateada = `${pad(fechaObj.getDate())}/${pad(fechaObj.getMonth() + 1)}/${fechaObj.getFullYear()} - ${pad(fechaObj.getHours())}:${pad(fechaObj.getMinutes())}:${pad(fechaObj.getSeconds())}`;
+        fecha.textContent = fechaFormateada;
         fila.appendChild(fecha);
+  
         tbody.appendChild(fila);
       }
     }
+  
     document.getElementById('buscadorReg').addEventListener('input', cargarRegistros);
     cargarRegistros();
   </script>
