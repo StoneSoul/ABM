@@ -3,29 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <title>Listado de Usuarios</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    input[type="text"] {
-      width: 300px; padding: 8px; margin-bottom: 15px;
-      border: 1px solid #ccc; border-radius: 4px;
-    }
-    table {
-      border-collapse: collapse; width: 100%;
-    }
-    th, td {
-      border: 1px solid #ccc; padding: 8px;
-    }
-    th {
-      background-color: #00414a; color: white;
-      cursor: pointer;
-    }
-    tr:nth-child(even) {
-      background-color: #f9f9f9;
-    }
-  </style>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <div id="header-placeholder"></div>
+  <main>
   <h2>Usuarios Importados</h2>
   <input type="text" id="buscador" placeholder="Buscar usuarios...">
 
@@ -45,7 +27,8 @@
     </thead>
     <tbody id="contenidoTabla"></tbody>
   </table>
-
+  </main>
+  <div id="footer-placeholder"></div>
   <script>
     async function cargarUsuarios() {
       const res = await fetch('/api/usuarios');

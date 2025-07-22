@@ -1,11 +1,15 @@
-async function loadHeader() {
+async function loadLayout() {
   try {
-    const res = await fetch('header.html');
-    const html = await res.text();
-    document.getElementById('header-placeholder').innerHTML = html;
+    const resHeader = await fetch('header.html');
+    const htmlHeader = await resHeader.text();
+    document.getElementById('header-placeholder').innerHTML = htmlHeader;
+
+    const resFooter = await fetch('footer.html');
+    const htmlFooter = await resFooter.text();
+    document.getElementById('footer-placeholder').innerHTML = htmlFooter;
   } catch (err) {
-    console.error('Error cargando cabecera:', err);
+    console.error('Error cargando cabecera o pie:', err);
   }
 }
 
-document.addEventListener('DOMContentLoaded', loadHeader);
+document.addEventListener('DOMContentLoaded', loadLayout);
