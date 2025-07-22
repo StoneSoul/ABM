@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Registros</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="header-placeholder"></div>
+  <main>
+    <h2>Registros de cambios de contraseña</h2>
+    <input type="text" id="buscadorReg" placeholder="Buscar...">
+    <table id="tablaRegistros">
+      <thead>
+        <tr>
+          <th>Usuario</th>
+          <th>Cambiado por</th>
+          <th>Fecha</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </main>
+  <div id="footer-placeholder"></div>
+  <script>
+    async function cargarRegistros() {
+      const q = document.getElementById('buscadorReg').value;
+      const res = await fetch('/api/registros' + (q ? ('?q=' + encodeURIComponent(q)) : ''));
+      const datos = await res.json();
+      const tbody = document.querySelector('#tablaRegistros tbody');
+      tbody.innerHTML = '';
+      for (const r of datos) {
+        const fila = document.createElement('tr');
+        const username = document.createElement('td');
+        username.textContent = r.username;
+        fila.appendChild(username);
+        const by = document.createElement('td');
+        by.textContent = r.changed_by;
+        fila.appendChild(by);
+        const fecha = document.createElement('td');
+        fecha.textContent = new Date(r.changed_at).toLocaleString();
+        fila.appendChild(fecha);
+        tbody.appendChild(fila);
+      }
+    }
+    document.getElementById('buscadorReg').addEventListener('input', cargarRegistros);
+    cargarRegistros();
+  </script>
+  <script src="header.js"></script>
+  <script src="logout.js"></script>
+</body>
+</html>

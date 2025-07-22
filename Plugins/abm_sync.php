@@ -116,10 +116,14 @@ function abm_notify_password_change($user, $new_pass) {
     }
     $url = rtrim($base_url, '/') . '/api/usuarios/wp-password-change';
 
+    $current = wp_get_current_user();
+    $changed_by = ($current && $current->ID && $current->ID !== $user->ID) ? 'admin' : 'user';
+
     $args = [
         'body' => json_encode([
             'username' => $user->user_login,
-            'new_password' => $new_pass
+            'new_password' => $new_pass,
+            'changed_by' => $changed_by
         ]),
         'headers' => [
             'Content-Type' => 'application/json'

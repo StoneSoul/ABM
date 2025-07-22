@@ -58,8 +58,23 @@ Por defecto, el servidor queda escuchando en el puerto indicado por `PORT`.
 - `middlewares/` – Middlewares de Express: validaciones, control de sesión y manejo de errores.  
 - `routes/` – Definición de rutas para la API (`/auth`, `/usuarios`).  
 - `services/` – Funciones auxiliares para sincronizar usuarios con WordPress y otros sistemas.  
-- `public/` – Archivos estáticos (formularios HTML) que sirven como interfaz básica.  
+- `public/` – Archivos estáticos (formularios HTML) que sirven como interfaz básica.
 - `Plugins/` – Plugin de WordPress utilizado para la integración con el ABM.
+
+## Tabla `password_logs`
+
+Para registrar los cambios de contraseña se utiliza la tabla `password_logs` en la base de datos del ABM. Debe crearse con la siguiente estructura básica:
+
+```sql
+CREATE TABLE password_logs (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  username VARCHAR(255) NOT NULL,
+  changed_by VARCHAR(50) NOT NULL,
+  changed_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+Cada vez que WordPress notifica un cambio de clave se inserta un registro indicando si el cambio lo realizó un usuario o un administrador.
 
 ## Comandos básicos
 
