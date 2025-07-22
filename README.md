@@ -42,6 +42,10 @@ WP_DB=
 
 Ajusta cada valor según tu configuración local o de producción.
 
+`WP_TOKEN` debe coincidir con el valor configurado en WordPress mediante la
+constante `ABM_SYNC_TOKEN` (o la opción `abm_sync_token`). Este token se envía en
+la cabecera `Authorization` al llamar a los endpoints del plugin.
+
 ## Uso
 
 Una vez instaladas las dependencias y configurado el archivo `.env`, puedes iniciar el servidor con:

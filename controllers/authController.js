@@ -14,7 +14,11 @@ exports.login = async (req, res) => {
       return res.json({ mensaje: 'Autenticado' });
     }
 
-    await axios.post(`${process.env.WP_API}/admin-login`, { username, password });
+    await axios.post(`${process.env.WP_API}/admin-login`, { username, password }, {
+      headers: {
+        Authorization: `Bearer ${process.env.WP_TOKEN}`,
+      },
+    });
     req.session.authenticated = true;
     req.session.user = username;
     res.json({ mensaje: 'Autenticado' });
