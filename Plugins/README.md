@@ -4,7 +4,7 @@ Este plugin sincroniza usuarios con un ABM externo.
 
 ## Configuraci\u00f3n
 
-1. Definir la URL base del API externo mediante la constante `ABM_API_URL` en `wp-config.php` o establecer la opci\u00f3n `abm_api_url` en WordPress.
+1. Definir la URL base del API externo mediante la constante `ABM_API_URL` en `wp-config.php` o establecer la opción `abm_api_url` en WordPress.
 2. Incluir el esquema `https://` si el servidor lo soporta.
 
 Ejemplo en `wp-config.php`:

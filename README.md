@@ -4,15 +4,15 @@ Este proyecto implementa un servidor Express que sincroniza usuarios con un sist
 
 ## Requisitos
 
-- **Node.js** (versi\u00f3n 16 o superior)
-- **npm**
+- **Node.js** (versión 16 o superior)  
+- **npm**  
 - **MySQL**
 
-## Instalaci\u00f3n
+## Instalación
 
-1. Clona el repositorio y ub\u00edcate en la carpeta del proyecto.
-2. Ejecuta `npm install` para instalar las dependencias.
-3. Copia el archivo `.env.example` a `.env` y completa los valores necesarios.
+1. Clona el repositorio y ubícate en la carpeta del proyecto.  
+2. Ejecuta `npm install` para instalar las dependencias.  
+3. Copia el archivo `.env.example` a `.env` y completa los valores necesarios:
 
 ```bash
 cp .env.example .env
@@ -40,7 +40,7 @@ WP_PASS=
 WP_DB=
 ```
 
-Ajusta cada valor seg\u00fan tu configuraci\u00f3n local o de producci\u00f3n.
+Ajusta cada valor según tu configuración local o de producción.
 
 ## Uso
 
@@ -50,19 +50,19 @@ Una vez instaladas las dependencias y configurado el archivo `.env`, puedes inic
 npm start
 ```
 
-Por defecto el servidor queda escuchando en el puerto indicado por `PORT`.
+Por defecto, el servidor queda escuchando en el puerto indicado por `PORT`.
 
 ## Estructura de carpetas
 
-- `controllers/` &ndash; L\u00f3gica principal de autenticaci\u00f3n y gesti\u00f3n de usuarios.
-- `middlewares/` &ndash; Middlewares de Express: validaciones, control de sesi\u00f3n y manejo de errores.
-- `routes/` &ndash; Definici\u00f3n de rutas para la API (`/auth`, `/usuarios`).
-- `services/` &ndash; Funciones auxiliares para sincronizar usuarios con WordPress y otros sistemas.
-- `public/` &ndash; Archivos est\u00e1ticos (formularios HTML) que sirven como interfaz b\u00e1sica.
-- `Plugins/` &ndash; Plugin de WordPress utilizado para la integraci\u00f3n con el ABM.
+- `controllers/` – Lógica principal de autenticación y gestión de usuarios.  
+- `middlewares/` – Middlewares de Express: validaciones, control de sesión y manejo de errores.  
+- `routes/` – Definición de rutas para la API (`/auth`, `/usuarios`).  
+- `services/` – Funciones auxiliares para sincronizar usuarios con WordPress y otros sistemas.  
+- `public/` – Archivos estáticos (formularios HTML) que sirven como interfaz básica.  
+- `Plugins/` – Plugin de WordPress utilizado para la integración con el ABM.
 
-## Comandos b\u00e1sicos
+## Comandos básicos
 
-- `npm install` &ndash; Instala todas las dependencias declaradas en `package.json`.
-- `npm start` &ndash; Inicia el servidor utilizando `node server.js`.
-- `pm2 start ecosystem.config.cjs` &ndash; Ejecuta el servidor con [PM2](https://pm2.keymetrics.io/) usando la configuración definida en `ecosystem.config.cjs`. Esta configuración está preparada para reiniciar el proceso automáticamente cuando se modifican los archivos.
+- `npm install` – Instala todas las dependencias declaradas en `package.json`.  
+- `npm start` – Inicia el servidor utilizando `node server.js`.  
+- `pm2 start ecosystem.config.cjs` – Ejecuta el servidor con [PM2](https://pm2.keymetrics.io/) usando la configuración definida en `ecosystem.config.cjs`. Esta configuración está preparada para reiniciar el proceso automáticamente cuando se modifican los archivos.
