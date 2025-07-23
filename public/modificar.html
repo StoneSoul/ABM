@@ -13,8 +13,10 @@
     <input type="text" name="username" placeholder="Usuario" required><br>
     <input type="password" name="password" placeholder="Nueva clave"><br>
     <input type="email" name="email" placeholder="Email"><br>
-    <input type="text" name="rol" placeholder="Rol_WP"><br>
-    <input type="text" name="rol_suite" placeholder="Rol_Suite"><br>
+    <input type="text" name="rol" value="subscriber" readonly><br>
+    <select name="rol_suite" id="rol_suite" required>
+      <option value="">Cargando roles...</option>
+    </select><br>    <input type="text" name="cod_profesional" placeholder="Código profesional"><br>
     <input type="text" name="cod_profesional" placeholder="Código profesional"><br>
     <input type="text" name="nombre" placeholder="Nombre"><br>
     <input type="text" name="apellido" placeholder="Apellido"><br>
