@@ -38,9 +38,7 @@ exports.crearUsuario = async (req, res, next) => {
   try {
     const datos = req.body;
 
-    if (!datos.alias) {
-      datos.alias = datos.username;
-    }
+    datos.alias = `${datos.nombre || ''} ${datos.apellido || ''}`.trim() || datos.alias || datos.username;
 
     await syncToWordpress(datos);
     await syncToSuite(datos);
@@ -53,9 +51,9 @@ exports.crearUsuario = async (req, res, next) => {
       port: process.env.DB_PORT || 3306,
     });
     await connection.execute(
-      `INSERT INTO usuarios (username, password, email, rol, cod_profesional, nombre, apellido, alias, estado, fecha_alta, fecha_modificacion)
+      `INSERT INTO usuarios (username, password, email, rol, cod_profesional, nombre, apellido, nombre_completo, estado, fecha_alta, fecha_modificacion)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, NOW(), NOW())
-       ON DUPLICATE KEY UPDATE password=VALUES(password), email=VALUES(email), rol=VALUES(rol), cod_profesional=VALUES(cod_profesional), nombre=VALUES(nombre), apellido=VALUES(apellido), alias=VALUES(alias), fecha_modificacion=NOW()`,
+       ON DUPLICATE KEY UPDATE password=VALUES(password), email=VALUES(email), rol=VALUES(rol), cod_profesional=VALUES(cod_profesional), nombre=VALUES(nombre), apellido=VALUES(apellido), nombre_completo=VALUES(nombre_completo), fecha_modificacion=NOW()`,
       [
         datos.username,
         datos.password,
@@ -89,7 +87,7 @@ exports.modificarUsuario = async (req, res, next) => {
       database: process.env.DB_NAME,
       port: process.env.DB_PORT || 3306,
     });
-    const query = `UPDATE usuarios SET email = ?, rol = ?, cod_profesional = ?, nombre = ?, apellido = ?, alias = ?, fecha_modificacion = NOW()${datos.password ? ', password = ?' : ''} WHERE username = ?`;
+    const query = `UPDATE usuarios SET email = ?, rol = ?, cod_profesional = ?, nombre = ?, apellido = ?, nombre_completo = ?, fecha_modificacion = NOW()${datos.password ? ', password = ?' : ''} WHERE username = ?`;
     const params = [
       datos.email || '',
       datos.rol || '',
@@ -125,7 +123,7 @@ exports.obtenerUsuario = async (req, res, next) => {
       port: process.env.DB_PORT || 3306,
     });
     const [rows] = await connection.execute(
-      `SELECT username, password, email, rol, cod_profesional, nombre, apellido, alias
+      `SELECT username, password, email, rol, cod_profesional, nombre, apellido, nombre_completo AS alias
        FROM usuarios WHERE username = ?`,
       [usernameParam]
     );
