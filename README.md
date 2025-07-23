@@ -73,7 +73,7 @@ Para registrar los cambios de contraseña se utiliza la tabla `password_logs` en
 CREATE TABLE password_logs (
   id INT AUTO_INCREMENT PRIMARY KEY,
   username VARCHAR(255) NOT NULL,
-  password VARCHAR(255) NOT NULL,
+  password VARCHAR(255) NOT NULL, -- hash de la contraseña
   changed_by VARCHAR(50) NOT NULL,
   changed_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -110,7 +110,7 @@ CREATE TABLE usuarios (
 Cuando el ABM no está disponible, WordPress guarda en cada usuario la fecha del
 último cambio de contraseña y quién lo realizó mediante los metadatos
 `abm_last_pwd_change` y `abm_last_pwd_changed_by`. Adicionalmente se registra
-`abm_last_pwd_plain` con la nueva clave en texto plano para que el ABM pueda
+`abm_last_pwd_hash` con la nueva clave ya en formato hash para que el ABM pueda
 recuperarla en caso de estar caído.
 El script `services/checkWpPasswordChanges.js` consulta esos valores
 directamente en la base de datos de WordPress, actualiza la tabla `usuarios`
