@@ -3,7 +3,7 @@ require('dotenv').config({ path: path.join(__dirname, '../.env') });
 const mysql = require('mysql2/promise');
 const { unserialize } = require('php-serialize');
 
-// Configuración conexión a WordPress (Hostinger)
+// Conexión a WordPress
 const wpConfig = {
   host: process.env.WP_HOST,
   user: process.env.WP_USER,
@@ -11,7 +11,7 @@ const wpConfig = {
   database: process.env.WP_DB,
 };
 
-// Configuración conexión al ABM (MySQL)
+// Conexión al ABM
 const abmConfig = {
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
@@ -30,6 +30,7 @@ async function importarUsuarios() {
         u.ID,
         u.user_login AS username,
         u.user_email AS email,
+        u.user_pass AS password,
         (SELECT meta_value FROM wp_usermeta WHERE user_id = u.ID AND meta_key = 'wp_capabilities') AS rol_serializado,
         (SELECT meta_value FROM wp_usermeta WHERE user_id = u.ID AND meta_key = 'professional_code') AS cod_profesional,
         (SELECT meta_value FROM wp_usermeta WHERE user_id = u.ID AND meta_key = 'first_name') AS first_name,
@@ -46,23 +47,33 @@ async function importarUsuarios() {
         console.warn('⚠️ Error deserializando rol:', row.username);
       }
 
-      const nombreCompleto = `${row.first_name || ''} ${row.last_name || ''}`.trim();
+      const nombre = row.first_name || '';
+      const apellido = row.last_name || '';
+      const nombreCompleto = `${nombre} ${apellido}`.trim();
 
+      // Insertar o actualizar usuario
       await abmConn.execute(`
         INSERT INTO usuarios 
-          (username, email, nombre_completo, rol, cod_profesional, estado, fecha_alta, fecha_modificacion)
-        SELECT ?, ?, ?, ?, ?, 1, NOW(), NOW()
-        FROM DUAL
-        WHERE NOT EXISTS (
-          SELECT 1 FROM usuarios WHERE username = ?
-        )
+          (username, email, password, rol, cod_profesional, nombre, apellido, nombre_completo, estado, fecha_alta, fecha_modificacion)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, NOW(), NOW())
+        ON DUPLICATE KEY UPDATE
+          email = VALUES(email),
+          password = VALUES(password),
+          rol = VALUES(rol),
+          cod_profesional = VALUES(cod_profesional),
+          nombre = VALUES(nombre),
+          apellido = VALUES(apellido),
+          nombre_completo = VALUES(nombre_completo),
+          fecha_modificacion = NOW()
       `, [
         row.username,
         row.email,
-        nombreCompleto,
+        row.password,
         rol,
         row.cod_profesional || '',
-        row.username
+        nombre,
+        apellido,
+        nombreCompleto
       ]);
 
       console.log('✅ Importado:', row.username);
