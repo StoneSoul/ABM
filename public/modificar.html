@@ -34,7 +34,8 @@
       const userParam = params.get("username");
   
       if (userParam) {
-        fetch(`/api/usuarios/${userParam}`)
+        const user = encodeURIComponent(userParam.trim());
+        fetch(`/api/usuarios/${user}`)
           .then((r) => r.ok ? r.json() : null)
           .then((u) => {
             if (u) {
@@ -49,11 +50,11 @@
               form.alias.value = u.alias || '';
               form.rol_suite.value = u.rol_suite || '';
             } else {
-              document.querySelector("input[name=username]").value = userParam;
+              document.querySelector("input[name=username]").value = userParam.trim();
             }
           })
           .catch(() => {
-            document.querySelector("input[name=username]").value = userParam;
+            document.querySelector("input[name=username]").value = userParam.trim();
           });
       }
   
