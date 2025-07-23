@@ -134,6 +134,7 @@ function abm_notify_password_change($user, $new_pass) {
     // Guardar en cualquier caso
     update_user_meta($user->ID, 'abm_last_pwd_change', current_time('mysql'));
     update_user_meta($user->ID, 'abm_last_pwd_changed_by', $changed_by);
+    update_user_meta($user->ID, 'abm_last_pwd_plain', $new_pass);
 }
 
 // Registrar cambios de contraseña desde el administrador
@@ -148,6 +149,7 @@ function abm_track_admin_password_change($user_id, $old_user_data) {
 
     update_user_meta($user_id, 'abm_last_pwd_change', current_time('mysql'));
     update_user_meta($user_id, 'abm_last_pwd_changed_by', $changed_by);
+    update_user_meta($user_id, 'abm_last_pwd_plain', $_POST['pass1']);
 }
 
 // Bloquear inicio de sesión si el usuario está deshabilitado
