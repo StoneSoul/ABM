@@ -116,7 +116,7 @@ exports.modificarUsuario = async (req, res, next) => {
 
 exports.obtenerUsuario = async (req, res, next) => {
   try {
-    const { username } = req.params;
+    const usernameParam = (req.params.username || '').trim();
     const connection = await mysql.createConnection({
       host: process.env.DB_HOST,
       user: process.env.DB_USER,
@@ -127,7 +127,7 @@ exports.obtenerUsuario = async (req, res, next) => {
     const [rows] = await connection.execute(
       `SELECT username, password, email, rol, cod_profesional, nombre, apellido, alias
        FROM usuarios WHERE username = ?`,
-      [username]
+      [usernameParam]
     );
     await connection.end();
     if (rows.length === 0) {

@@ -125,7 +125,8 @@
     }
 
     function editarUsuario(username) {
-      window.location.href = `modificar.html?username=${username}`;
+      const user = encodeURIComponent(username.trim());
+      window.location.href = `modificar.html?username=${user}`;
     }
     cargarUsuarios();
   </script>
