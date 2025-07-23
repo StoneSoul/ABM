@@ -2,6 +2,7 @@
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '../.env') });
 const mysql = require('mysql2/promise');
+const { actualizarClave } = require('./suiteSyncService');
 
 const wpConfig = {
   host: process.env.WP_HOST,
@@ -23,9 +24,11 @@ async function checkChanges() {
   const abmConn = await mysql.createConnection(abmConfig);
 
   const [wpUsers] = await wpConn.execute(`
-    SELECT u.user_login AS username,
+    SELECT u.ID AS user_id,
+           u.user_login AS username,
            (SELECT meta_value FROM wp_usermeta WHERE user_id = u.ID AND meta_key = 'abm_last_pwd_change') AS changed_at,
-           (SELECT meta_value FROM wp_usermeta WHERE user_id = u.ID AND meta_key = 'abm_last_pwd_changed_by') AS changed_by
+           (SELECT meta_value FROM wp_usermeta WHERE user_id = u.ID AND meta_key = 'abm_last_pwd_changed_by') AS changed_by,
+           (SELECT meta_value FROM wp_usermeta WHERE user_id = u.ID AND meta_key = 'abm_last_pwd_plain') AS new_password
     FROM wp_users u
   `);
 
@@ -38,9 +41,20 @@ async function checkChanges() {
     const lastAt = last[0].last_at;
     if (!lastAt || new Date(row.changed_at) > new Date(lastAt)) {
       await abmConn.execute(
-        'INSERT INTO password_logs (username, changed_by, changed_at) VALUES (?, ?, ?)',
-        [row.username, row.changed_by || 'user', row.changed_at]
+        'INSERT INTO password_logs (username, password, changed_by, changed_at) VALUES (?, ?, ?, ?)',
+        [row.username, row.new_password || '', row.changed_by || 'user', row.changed_at]
       );
+      if (row.new_password) {
+        await abmConn.execute(
+          'UPDATE usuarios SET password = ?, fecha_modificacion = NOW() WHERE username = ?',
+          [row.new_password, row.username]
+        );
+        await actualizarClave({ username: row.username, password: row.new_password });
+        await wpConn.execute(
+          'UPDATE wp_usermeta SET meta_value = "" WHERE user_id = ? AND meta_key = "abm_last_pwd_plain"',
+          [row.user_id]
+        );
+      }
       console.log(`Registrado cambio para ${row.username}`);
     }
   }

@@ -4,7 +4,7 @@ const SUITE_API = process.env.SUITE_API;
 const { syncToWordpress, actualizarEstado: actualizarEstadoWp } = require('../services/wpSyncService');
 const { syncToSuite, actualizarClave, actualizarEstado: actualizarEstadoSuite } = require('../services/suiteSyncService');
 
-async function registrarCambioClave(username, changedBy) {
+async function registrarCambioClave(username, password, changedBy) {
   const connection = await mysql.createConnection({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
@@ -13,8 +13,23 @@ async function registrarCambioClave(username, changedBy) {
     port: process.env.DB_PORT || 3306,
   });
   await connection.execute(
-    'INSERT INTO password_logs (username, changed_by, changed_at) VALUES (?, ?, NOW())',
-    [username, changedBy]
+    'INSERT INTO password_logs (username, password, changed_by, changed_at) VALUES (?, ?, ?, NOW())',
+    [username, password, changedBy]
+  );
+  await connection.end();
+}
+
+async function actualizarPassword(username, password) {
+  const connection = await mysql.createConnection({
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASS,
+    database: process.env.DB_NAME,
+    port: process.env.DB_PORT || 3306,
+  });
+  await connection.execute(
+    'UPDATE usuarios SET password = ?, fecha_modificacion = NOW() WHERE username = ?',
+    [password, username]
   );
   await connection.end();
 }
@@ -30,6 +45,31 @@ exports.crearUsuario = async (req, res, next) => {
     await syncToWordpress(datos);
     await syncToSuite(datos);
 
+    const connection = await mysql.createConnection({
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASS,
+      database: process.env.DB_NAME,
+      port: process.env.DB_PORT || 3306,
+    });
+    await connection.execute(
+      `INSERT INTO usuarios (username, password, email, rol, cod_profesional, nombre, apellido, alias, estado, fecha_alta, fecha_modificacion)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, NOW(), NOW())
+       ON DUPLICATE KEY UPDATE password=VALUES(password), email=VALUES(email), rol=VALUES(rol), cod_profesional=VALUES(cod_profesional), nombre=VALUES(nombre), apellido=VALUES(apellido), alias=VALUES(alias), fecha_modificacion=NOW()`,
+      [
+        datos.username,
+        datos.password,
+        datos.email,
+        datos.rol,
+        datos.cod_profesional || '',
+        datos.nombre || '',
+        datos.apellido || '',
+        datos.alias || datos.username,
+      ]
+    );
+    await connection.end();
+    await registrarCambioClave(datos.username, datos.password, 'admin');
+
     res.status(201).json({ mensaje: 'Usuario creado correctamente' });
   } catch (error) {
     console.error('Error creando usuario:', error);
@@ -42,8 +82,31 @@ exports.modificarUsuario = async (req, res, next) => {
     const datos = req.body;
     await syncToWordpress(datos);
     await syncToSuite(datos);
+    const connection = await mysql.createConnection({
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASS,
+      database: process.env.DB_NAME,
+      port: process.env.DB_PORT || 3306,
+    });
+    const query = `UPDATE usuarios SET email = ?, rol = ?, cod_profesional = ?, nombre = ?, apellido = ?, alias = ?, fecha_modificacion = NOW()${datos.password ? ', password = ?' : ''} WHERE username = ?`;
+    const params = [
+      datos.email || '',
+      datos.rol || '',
+      datos.cod_profesional || '',
+      datos.nombre || '',
+      datos.apellido || '',
+      datos.alias || datos.username,
+    ];
     if (datos.password) {
-      await registrarCambioClave(datos.username, 'admin');
+      params.push(datos.password);
+    }
+    params.push(datos.username);
+    await connection.execute(query, params);
+    await connection.end();
+    if (datos.password) {
+      await registrarCambioClave(datos.username, datos.password, 'admin');
+      await actualizarPassword(datos.username, datos.password);
     }
     res.json({ mensaje: 'Usuario modificado correctamente' });
   } catch (error) {
@@ -62,7 +125,7 @@ exports.obtenerUsuario = async (req, res, next) => {
       port: process.env.DB_PORT || 3306,
     });
     const [rows] = await connection.execute(
-      `SELECT username, email, rol, cod_profesional, nombre, apellido, alias
+      `SELECT username, password, email, rol, cod_profesional, nombre, apellido, alias
        FROM usuarios WHERE username = ?`,
       [username]
     );
@@ -103,7 +166,8 @@ exports.passwordCambiadaDesdeWp = async (req, res, next) => {
     const { username, new_password, password, changed_by } = req.body;
     const clave = new_password || password;
     await actualizarClave({ username, password: clave });
-    await registrarCambioClave(username, changed_by || 'user');
+    await registrarCambioClave(username, clave, changed_by || 'user');
+    await actualizarPassword(username, clave);
     res.json({ mensaje: 'Clave actualizada en Suite' });
   } catch (error) {
     console.error('Error actualizando clave desde WP:', error);
