@@ -32,7 +32,7 @@ function abm_create_user($request) {
 
     $username = sanitize_user($params['username']);
     $email = sanitize_email($params['email']);
-    $password = $params['password'];
+    $password = $params['password']; // hashed password generado por el ABM
     $rol = sanitize_text_field($params['rol']);
     $codigos = sanitize_text_field($params['cod_profesional']);
 
@@ -50,7 +50,7 @@ function abm_create_user($request) {
 
     $user_id = wp_insert_user([
         'user_login'    => $username,
-        'user_pass'     => $password,
+        'user_pass'     => wp_generate_password(),
         'user_email'    => $email,
         'role'          => $rol,
         'first_name'    => $nombre,
@@ -59,6 +59,9 @@ function abm_create_user($request) {
         'display_name'  => "$nombre $apellido"
     ]);
 
+    if (!is_wp_error($user_id)) {
+        abm_set_hashed_password($user_id, $password);
+    }
     if (is_wp_error($user_id)) {
         return new WP_Error('insert_failed', 'Error al crear usuario', ['status' => 500]);
     }
@@ -67,6 +70,17 @@ function abm_create_user($request) {
     update_user_meta($user_id, 'abm_enabled', 1); // Por defecto: habilitado
 
     return rest_ensure_response(['mensaje' => 'Usuario creado correctamente']);
+}
+
+// Establecer directamente la contraseña con un hash ya generado
+function abm_set_hashed_password($user_id, $hashed_password) {
+    global $wpdb;
+    $wpdb->update(
+        $wpdb->users,
+        ['user_pass' => $hashed_password, 'user_activation_key' => ''],
+        ['ID' => $user_id]
+    );
+    clean_user_cache($user_id);
 }
 
 // Validar login de administrador
@@ -111,6 +125,8 @@ function abm_notify_password_change($user, $new_pass) {
     $current = wp_get_current_user();
     $changed_by = ($current && $current->ID && $current->ID !== $user->ID) ? 'admin' : 'user';
 
+    $hash = wp_hash_password($new_pass);
+
     if ($base_url) {
         $url = rtrim($base_url, '/') . '/api/usuarios/wp-password-change';
         $token = defined('ABM_SYNC_TOKEN') ? ABM_SYNC_TOKEN : get_option('abm_sync_token');
@@ -118,7 +134,7 @@ function abm_notify_password_change($user, $new_pass) {
         $args = [
             'body' => json_encode([
                 'username' => $user->user_login,
-                'new_password' => $new_pass,
+                'password_hash' => $hash,
                 'changed_by' => $changed_by
             ]),
             'headers' => [
@@ -134,7 +150,7 @@ function abm_notify_password_change($user, $new_pass) {
     // Guardar en cualquier caso
     update_user_meta($user->ID, 'abm_last_pwd_change', current_time('mysql'));
     update_user_meta($user->ID, 'abm_last_pwd_changed_by', $changed_by);
-    update_user_meta($user->ID, 'abm_last_pwd_plain', $new_pass);
+    update_user_meta($user->ID, 'abm_last_pwd_hash', $hash);
 }
 
 // Registrar cambios de contraseña desde el administrador
@@ -147,9 +163,11 @@ function abm_track_admin_password_change($user_id, $old_user_data) {
     $current_user = wp_get_current_user();
     $changed_by = ($current_user && $current_user->ID !== $user_id) ? 'admin' : 'user';
 
+    $hash = wp_hash_password($_POST['pass1']);
+
     update_user_meta($user_id, 'abm_last_pwd_change', current_time('mysql'));
     update_user_meta($user_id, 'abm_last_pwd_changed_by', $changed_by);
-    update_user_meta($user_id, 'abm_last_pwd_plain', $_POST['pass1']);
+    update_user_meta($user_id, 'abm_last_pwd_hash', $hash);
 }
 
 // Bloquear inicio de sesión si el usuario está deshabilitado

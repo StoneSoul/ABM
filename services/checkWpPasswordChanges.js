@@ -28,7 +28,7 @@ async function checkChanges() {
            u.user_login AS username,
            (SELECT meta_value FROM wp_usermeta WHERE user_id = u.ID AND meta_key = 'abm_last_pwd_change') AS changed_at,
            (SELECT meta_value FROM wp_usermeta WHERE user_id = u.ID AND meta_key = 'abm_last_pwd_changed_by') AS changed_by,
-           (SELECT meta_value FROM wp_usermeta WHERE user_id = u.ID AND meta_key = 'abm_last_pwd_plain') AS new_password
+           (SELECT meta_value FROM wp_usermeta WHERE user_id = u.ID AND meta_key = 'abm_last_pwd_hash') AS password_hash
     FROM wp_users u
   `);
 
@@ -42,16 +42,16 @@ async function checkChanges() {
     if (!lastAt || new Date(row.changed_at) > new Date(lastAt)) {
       await abmConn.execute(
         'INSERT INTO password_logs (username, password, changed_by, changed_at) VALUES (?, ?, ?, ?)',
-        [row.username, row.new_password || '', row.changed_by || 'user', row.changed_at]
+        [row.username, row.password_hash || '', row.changed_by || 'user', row.changed_at]
       );
-      if (row.new_password) {
+      if (row.password_hash) {
         await abmConn.execute(
           'UPDATE usuarios SET password = ?, fecha_modificacion = NOW() WHERE username = ?',
-          [row.new_password, row.username]
+          [row.password_hash, row.username]
         );
-        await actualizarClave({ username: row.username, password: row.new_password });
+        await actualizarClave({ username: row.username, password: row.password_hash });
         await wpConn.execute(
-          'UPDATE wp_usermeta SET meta_value = "" WHERE user_id = ? AND meta_key = "abm_last_pwd_plain"',
+          'UPDATE wp_usermeta SET meta_value = "" WHERE user_id = ? AND meta_key = "abm_last_pwd_hash"',
           [row.user_id]
         );
       }

@@ -3,6 +3,7 @@ const axios = require('axios');
 const SUITE_API = process.env.SUITE_API;
 const { syncToWordpress, actualizarEstado: actualizarEstadoWp } = require('../services/wpSyncService');
 const { syncToSuite, actualizarClave, actualizarEstado: actualizarEstadoSuite } = require('../services/suiteSyncService');
+const { hashPassword } = require('../services/passwordHashService');
 
 async function registrarCambioClave(username, password, changedBy) {
   const connection = await mysql.createConnection({
@@ -39,6 +40,10 @@ exports.crearUsuario = async (req, res, next) => {
     const datos = req.body;
 
     datos.alias = `${datos.nombre || ''} ${datos.apellido || ''}`.trim() || datos.alias || datos.username;
+
+    if (datos.password) {
+      datos.password = hashPassword(datos.password);
+    }
 
     await syncToWordpress(datos);
     await syncToSuite(datos);
@@ -78,6 +83,9 @@ exports.crearUsuario = async (req, res, next) => {
 exports.modificarUsuario = async (req, res, next) => {
   try {
     const datos = req.body;
+    if (datos.password) {
+      datos.password = hashPassword(datos.password);
+    }
     await syncToWordpress(datos);
     await syncToSuite(datos);
     const connection = await mysql.createConnection({
@@ -161,11 +169,10 @@ exports.obtenerRolesSuite = async (req, res, next) => {
 
 exports.passwordCambiadaDesdeWp = async (req, res, next) => {
   try {
-    const { username, new_password, password, changed_by } = req.body;
-    const clave = new_password || password;
-    await actualizarClave({ username, password: clave });
-    await registrarCambioClave(username, clave, changed_by || 'user');
-    await actualizarPassword(username, clave);
+    const { username, password_hash, changed_by } = req.body;
+    await actualizarClave({ username, password: password_hash });
+    await registrarCambioClave(username, password_hash, changed_by || 'user');
+    await actualizarPassword(username, password_hash);
     res.json({ mensaje: 'Clave actualizada en Suite' });
   } catch (error) {
     console.error('Error actualizando clave desde WP:', error);
