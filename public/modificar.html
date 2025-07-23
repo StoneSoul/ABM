@@ -24,44 +24,53 @@
   </form>
   </main>
   <div id="footer-placeholder"></div>
-  <script>
-    const params = new URLSearchParams(window.location.search);
-    const userParam = params.get("username");
-    if (userParam) {
-      fetch(`/api/usuarios/${userParam}`)
-        .then((r) => r.ok ? r.json() : null)
-        .then((u) => {
-          if (u) {
-            const form = document.getElementById('modificarForm');
-            form.username.value = u.username || '';
-            form.password.value = u.password || '';
-            form.email.value = u.email || '';
-            form.rol.value = u.rol || '';
-            form.cod_profesional.value = u.cod_profesional || '';
-            form.nombre.value = u.nombre || '';
-            form.apellido.value = u.apellido || '';
-            form.alias.value = u.alias || '';
-          } else {
+  <script type="module">
+    import { cargarRolesSuite } from './cargarRolesSuite.js';
+  
+    document.addEventListener('DOMContentLoaded', () => {
+      cargarRolesSuite();
+  
+      const params = new URLSearchParams(window.location.search);
+      const userParam = params.get("username");
+  
+      if (userParam) {
+        fetch(`/api/usuarios/${userParam}`)
+          .then((r) => r.ok ? r.json() : null)
+          .then((u) => {
+            if (u) {
+              const form = document.getElementById('modificarForm');
+              form.username.value = u.username || '';
+              form.password.value = u.password || '';
+              form.email.value = u.email || '';
+              form.rol.value = u.rol || '';
+              form.cod_profesional.value = u.cod_profesional || '';
+              form.nombre.value = u.nombre || '';
+              form.apellido.value = u.apellido || '';
+              form.alias.value = u.alias || '';
+              form.rol_suite.value = u.rol_suite || '';
+            } else {
+              document.querySelector("input[name=username]").value = userParam;
+            }
+          })
+          .catch(() => {
             document.querySelector("input[name=username]").value = userParam;
-          }
-        })
-        .catch(() => {
-          document.querySelector("input[name=username]").value = userParam;
-        });
-    }
-    document.getElementById('modificarForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const data = Object.fromEntries(new FormData(e.target).entries());
-      const res = await fetch('/api/usuarios/modificar', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
-      if (res.ok) {
-        alert('Usuario modificado');
-      } else {
-        alert('Error al modificar');
+          });
       }
+  
+      document.getElementById('modificarForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const data = Object.fromEntries(new FormData(e.target).entries());
+        const res = await fetch('/api/usuarios/modificar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        if (res.ok) {
+          alert('Usuario modificado');
+        } else {
+          alert('Error al modificar');
+        }
+      });
     });
   </script>
   <script src="header.js"></script>
