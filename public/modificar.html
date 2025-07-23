@@ -19,7 +19,7 @@
     <input type="text" name="cod_profesional" placeholder="Código profesional"><br>
     <input type="text" name="nombre" placeholder="Nombre"><br>
     <input type="text" name="apellido" placeholder="Apellido"><br>
-    <input type="text" name="alias" placeholder="Alias"><br>
+    <input type="text" name="alias" placeholder="Alias" readonly><br>
     <button type="submit">Guardar</button>
   </form>
   </main>
@@ -29,6 +29,15 @@
   
     document.addEventListener('DOMContentLoaded', () => {
       cargarRolesSuite();
+
+      const form = document.getElementById('modificarForm');
+      const actualizarAlias = () => {
+        const nombre = form.nombre.value.trim();
+        const apellido = form.apellido.value.trim();
+        form.alias.value = `${nombre} ${apellido}`.trim();
+      };
+      form.nombre.addEventListener('input', actualizarAlias);
+      form.apellido.addEventListener('input', actualizarAlias);
   
       const params = new URLSearchParams(window.location.search);
       const userParam = params.get("username");
