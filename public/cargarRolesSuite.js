@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const roles = await res.json();
 
     const select = document.getElementById('rol_suite');
-    select.innerHTML = '<option value="">Seleccione un rol</option>';
+    select.innerHTML = '<option value="">Seleccione uno o varios roles</option>';
 
     roles.forEach(rol => {
       const option = document.createElement('option');
