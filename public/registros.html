@@ -2,37 +2,39 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Registros</title>
-  <link rel="stylesheet" href="styles.css">
+  <title>Registros de Contraseña</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <div id="header-placeholder"></div>
-  <main>
-    <h2>Registros de cambios de contraseña</h2>
-    <input type="text" id="buscadorReg" placeholder="Buscar...">
-    <table id="tablaRegistros">
-      <thead>
-        <tr>
-          <th>Usuario</th>
-          <th>Cambiado por</th>
-          <th>Fecha</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </main>
-  <div id="footer-placeholder"></div>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center">
+  <div class="w-full max-w-6xl p-6">
+    <h2 class="text-3xl font-bold text-center mb-6 text-gray-700">Registros de Cambios de Contraseña</h2>
+
+    <input type="text" id="buscadorReg" placeholder="Buscar..."
+           class="mb-4 w-full max-w-md mx-auto block border border-gray-300 rounded-md px-4 py-2 focus:ring-2 focus:ring-blue-500" />
+
+    <div class="overflow-x-auto rounded-lg shadow">
+      <table id="tablaRegistros" class="min-w-full divide-y divide-gray-200 bg-white">
+        <thead class="bg-gray-100 text-xs text-gray-600 uppercase">
+          <tr>
+            <th class="px-4 py-2">Usuario</th>
+            <th class="px-4 py-2">Cambiado por</th>
+            <th class="px-4 py-2">Fecha</th>
+          </tr>
+        </thead>
+        <tbody class="text-sm text-gray-700 divide-y divide-gray-100">
+          <!-- Se rellena dinámicamente -->
+        </tbody>
+      </table>
+    </div>
+  </div>
 
   <script>
     function formatearFechaSimple(fechaStr) {
       if (!fechaStr || typeof fechaStr !== 'string') return '—';
-      
-      // Acepta "2025-07-22 12:44:34" o "2025-07-22T12:44:34.000Z"
       const cleanStr = fechaStr.includes('T') ? fechaStr.replace('T', ' ').split('.')[0] : fechaStr;
-      
       const [fecha, hora] = cleanStr.split(' ');
       if (!fecha || !hora) return fechaStr;
-
       const [a, m, d] = fecha.split('-');
       return `${d}/${m}/${a} - ${hora}`;
     }
@@ -47,17 +49,16 @@
       for (const r of datos) {
         const fila = document.createElement('tr');
 
-        const username = document.createElement('td');
-        username.textContent = r.username;
-        fila.appendChild(username);
+        const td = (text) => {
+          const cell = document.createElement('td');
+          cell.className = "px-4 py-2";
+          cell.textContent = text;
+          return cell;
+        };
 
-        const by = document.createElement('td');
-        by.textContent = r.changed_by;
-        fila.appendChild(by);
-
-        const fecha = document.createElement('td');
-        fecha.textContent = formatearFechaSimple(r.changed_at);
-        fila.appendChild(fecha);
+        fila.appendChild(td(r.username));
+        fila.appendChild(td(r.changed_by));
+        fila.appendChild(td(formatearFechaSimple(r.changed_at)));
 
         tbody.appendChild(fila);
       }
@@ -66,8 +67,5 @@
     document.getElementById('buscadorReg').addEventListener('input', cargarRegistros);
     cargarRegistros();
   </script>
-
-  <script src="header.js"></script>
-  <script src="logout.js"></script>
 </body>
 </html>

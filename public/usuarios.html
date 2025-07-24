@@ -3,32 +3,38 @@
 <head>
   <meta charset="UTF-8">
   <title>Listado de Usuarios</title>
-  <link rel="stylesheet" href="styles.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <div id="header-placeholder"></div>
-  <main>
-  <h2>Usuarios Importados</h2>
-  <input type="text" id="buscador" placeholder="Buscar usuarios...">
+<body class="bg-gray-100 min-h-screen flex flex-col items-center">
+  <div class="w-full max-w-7xl p-6">
+    <h2 class="text-3xl font-bold text-center mb-6 text-gray-700">Usuarios Importados</h2>
 
-  <table id="tablaUsuarios">
-    <thead>
-      <tr>
-        <th onclick="ordenar(0)">Usuario</th>
-        <th onclick="ordenar(1)">Email</th>
-        <th onclick="ordenar(2)">Nombre completo</th>
-        <th onclick="ordenar(3)">Rol_WP</th>
-        <th onclick="ordenar(4)">Rol_Suite</th>
-        <th onclick="ordenar(5)">Código Profesional</th>
-        <th onclick="ordenar(6)">Estado</th>
-        <th>Acción</th>
-        <th>Editar</th>
-      </tr>
-    </thead>
-    <tbody id="contenidoTabla"></tbody>
-  </table>
-  </main>
-  <div id="footer-placeholder"></div>
+    <input type="text" id="buscador" placeholder="Buscar usuarios..."
+           class="mb-4 w-full max-w-md mx-auto block border border-gray-300 rounded-md px-4 py-2 focus:ring-2 focus:ring-blue-500" />
+
+    <div class="overflow-x-auto rounded-lg shadow">
+      <table id="tablaUsuarios" class="min-w-full divide-y divide-gray-200 bg-white">
+        <thead class="bg-gray-100 text-xs text-gray-600 uppercase">
+          <tr>
+            <th class="px-4 py-2 cursor-pointer" onclick="ordenar(0)">Usuario</th>
+            <th class="px-4 py-2 cursor-pointer" onclick="ordenar(1)">Email</th>
+            <th class="px-4 py-2 cursor-pointer" onclick="ordenar(2)">Nombre completo</th>
+            <th class="px-4 py-2 cursor-pointer" onclick="ordenar(3)">Rol WP</th>
+            <th class="px-4 py-2 cursor-pointer" onclick="ordenar(4)">Rol Suite</th>
+            <th class="px-4 py-2 cursor-pointer" onclick="ordenar(5)">Código Profesional</th>
+            <th class="px-4 py-2 cursor-pointer" onclick="ordenar(6)">Estado</th>
+            <th class="px-4 py-2">Acción</th>
+            <th class="px-4 py-2">Editar</th>
+          </tr>
+        </thead>
+        <tbody id="contenidoTabla" class="text-sm text-gray-700 divide-y divide-gray-100">
+          <!-- Se rellena dinámicamente -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
   <script>
     async function cargarUsuarios() {
       const res = await fetch('/api/usuarios');
@@ -39,98 +45,82 @@
       for (const u of datos) {
         const fila = document.createElement('tr');
 
-        const username = document.createElement('td');
-        username.textContent = u.username;
-        fila.appendChild(username);
+        const td = (text) => {
+          const cell = document.createElement('td');
+          cell.className = "px-4 py-2";
+          cell.textContent = text;
+          return cell;
+        };
 
-        const email = document.createElement('td');
-        email.textContent = u.email;
-        fila.appendChild(email);
-
-        const nombreCompleto = document.createElement('td');
-        nombreCompleto.textContent = u.nombre_completo;
-        fila.appendChild(nombreCompleto);
-
-        const rol = document.createElement('td');
-        rol.textContent = u.rol;
-        fila.appendChild(rol);
-
-        const rol_suite = document.createElement('td');
-        rol_suite.textContent = u.rol_suite;
-        fila.appendChild(rol_suite);
-
-        const codProfesional = document.createElement('td');
-        codProfesional.textContent = u.cod_profesional;
-        fila.appendChild(codProfesional);
-
-        const estado = document.createElement('td');
-        estado.textContent = u.estado === 1 ? 'Activo' : 'Inactivo';
-        fila.appendChild(estado);
+        fila.appendChild(td(u.username));
+        fila.appendChild(td(u.email));
+        fila.appendChild(td(u.nombre_completo));
+        fila.appendChild(td(u.rol));
+        fila.appendChild(td(u.rol_suite));
+        fila.appendChild(td(u.cod_profesional));
+        fila.appendChild(td(u.estado));
 
         const accion = document.createElement('td');
-        const btnEstado = document.createElement('button');
-        btnEstado.textContent = u.estado === 1 ? 'Deshabilitar' : 'Habilitar';
-        btnEstado.onclick = () => toggleEstado(u.username, u.estado);
-        accion.appendChild(btnEstado);
+        accion.className = "px-4 py-2 text-center";
+        const btn = document.createElement('button');
+        btn.textContent = u.estado === 'activo' ? 'Desactivar' : 'Activar';
+        btn.className = u.estado === 'activo'
+          ? 'bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600'
+          : 'bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600';
+        btn.onclick = async () => {
+          const confirmacion = confirm(`¿Deseas ${btn.textContent.toLowerCase()} este usuario?`);
+          if (!confirmacion) return;
+
+          const res = await fetch(`/api/usuarios/${u.id}/estado`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ estado: u.estado === 'activo' ? 'inactivo' : 'activo' })
+          });
+          if (res.ok) cargarUsuarios();
+        };
+        accion.appendChild(btn);
         fila.appendChild(accion);
 
         const editar = document.createElement('td');
-        const btnEditar = document.createElement('button');
-        btnEditar.textContent = 'Editar';
-        btnEditar.onclick = () => editarUsuario(u.username);
-        editar.appendChild(btnEditar);
+        editar.className = "px-4 py-2 text-center";
+        const link = document.createElement('a');
+        link.href = `/modificar.html?username=${encodeURIComponent(u.username)}`;
+        link.textContent = 'Editar';
+        link.className = 'text-blue-600 hover:underline';
+        editar.appendChild(link);
         fila.appendChild(editar);
 
         tbody.appendChild(fila);
       }
     }
 
-    async function toggleEstado(username, estado) {
-      const nuevo = estado === 1 ? 0 : 1;
-      const res = await fetch('/api/usuarios/estado', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, estado: nuevo })
+    function ordenar(columna) {
+      const tabla = document.getElementById("tablaUsuarios");
+      const filas = Array.from(tabla.tBodies[0].rows);
+      const asc = !tabla.dataset.orden || tabla.dataset.orden === "desc";
+
+      filas.sort((a, b) => {
+        const valA = a.cells[columna].textContent.trim().toLowerCase();
+        const valB = b.cells[columna].textContent.trim().toLowerCase();
+        return asc ? valA.localeCompare(valB) : valB.localeCompare(valA);
       });
-      if (res.ok) {
-        cargarUsuarios();
-      } else {
-        alert('No se pudo cambiar el estado');
-      }
+
+      tabla.dataset.orden = asc ? "asc" : "desc";
+      const cuerpo = tabla.tBodies[0];
+      cuerpo.innerHTML = "";
+      filas.forEach(f => cuerpo.appendChild(f));
     }
 
-    document.getElementById('buscador').addEventListener('input', function() {
-      const filtro = this.value.toLowerCase();
-      const filas = document.querySelectorAll('#tablaUsuarios tbody tr');
+    document.getElementById('buscador').addEventListener('input', (e) => {
+      const filtro = e.target.value.toLowerCase();
+      const filas = document.querySelectorAll('#contenidoTabla tr');
       filas.forEach(fila => {
         const texto = fila.textContent.toLowerCase();
         fila.style.display = texto.includes(filtro) ? '' : 'none';
       });
     });
 
-    function ordenar(columna) {
-      const filas = Array.from(document.querySelectorAll('#tablaUsuarios tbody tr'));
-      const ascendente = !this.ascendente;
-      this.ascendente = ascendente;
-
-      filas.sort((a, b) => {
-        const valA = a.children[columna].textContent.toLowerCase();
-        const valB = b.children[columna].textContent.toLowerCase();
-        return ascendente ? valA.localeCompare(valB) : valB.localeCompare(valA);
-      });
-
-      const tbody = document.getElementById('contenidoTabla');
-      tbody.innerHTML = '';
-      filas.forEach(f => tbody.appendChild(f));
-    }
-
-    function editarUsuario(username) {
-      const user = encodeURIComponent(username.trim());
-      window.location.href = `modificar.html?username=${user}`;
-    }
     cargarUsuarios();
   </script>
-  <script src="header.js"></script>
-  <script src="logout.js"></script>
 </body>
 </html>

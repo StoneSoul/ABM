@@ -1,12 +1,18 @@
-<header class="main-header">
-  <div class="logo-container">
-    <img src="logo.png" alt="Logo IMC" class="logo">
+<header class="bg-white shadow-md w-full">
+  <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <img src="logo.png" alt="Logo IMC" class="h-10 w-auto">
+      <span class="text-lg font-semibold text-gray-800">Intranet IMC</span>
+    </div>
+    <nav class="flex items-center space-x-4">
+      <a href="index.html" class="text-gray-700 hover:text-blue-600 transition">Inicio</a>
+      <a href="crear.html" class="text-gray-700 hover:text-blue-600 transition">Crear usuario</a>
+      <a href="usuarios.html" class="text-gray-700 hover:text-blue-600 transition">Listar usuarios</a>
+      <a href="registros.html" class="text-gray-700 hover:text-blue-600 transition">Registros</a>
+      <button id="btnLogout" type="button"
+              class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded transition">
+        Cerrar sesión
+      </button>
+    </nav>
   </div>
-  <nav>
-    <a href="index.html">Inicio</a>
-    <a href="crear.html">Crear usuario</a>
-    <a href="usuarios.html">Listar usuarios</a>
-    <a href="registros.html">Registros</a>
-    <button id="btnLogout" type="button">Cerrar sesión</button>
-  </nav>
 </header>

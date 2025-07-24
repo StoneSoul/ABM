@@ -3,31 +3,69 @@
 <head>
   <meta charset="UTF-8">
   <title>Modificar Usuario</title>
-  <link rel="stylesheet" href="styles.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <div id="header-placeholder"></div>
-  <main>
-  <h2>Modificar Usuario</h2>
-  <form id="modificarForm">
-    <input type="text" name="username" placeholder="Usuario" required><br>
-    <input type="password" name="password" placeholder="Nueva clave"><br>
-    <input type="email" name="email" placeholder="Email"><br>
-    <div id="rolesContainer"></div><br>
-    <input type="text" name="rol" value="subscriber" readonly><br>
-    <input type="text" name="cod_profesional" placeholder="Código profesional"><br>
-    <input type="text" name="nombre" placeholder="Nombre"><br>
-    <input type="text" name="apellido" placeholder="Apellido"><br>
-    <input type="text" name="alias" placeholder="Alias" readonly><br>
-    <button type="submit">Guardar</button>
-  </form>
-  </main>
-  <div id="footer-placeholder"></div>
-  <script type="module">
-    import { cargarRolesSuite } from './cargarRolesSuite.js';
+<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center py-8">
+  <div class="w-full max-w-2xl bg-white shadow-md rounded-lg p-8">
+    <h2 class="text-2xl font-bold text-center mb-6 text-gray-700">Modificar Usuario</h2>
+    <form id="modificarForm" class="space-y-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label for="username" class="block text-sm font-medium text-gray-600">Usuario</label>
+          <input type="text" name="username" id="username" required
+                 class="mt-1 w-full border-gray-300 rounded-md px-4 py-2 border focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label for="password" class="block text-sm font-medium text-gray-600">Nueva Clave</label>
+          <input type="password" name="password" id="password"
+                 class="mt-1 w-full border-gray-300 rounded-md px-4 py-2 border focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label for="email" class="block text-sm font-medium text-gray-600">Email</label>
+          <input type="email" name="email" id="email"
+                 class="mt-1 w-full border-gray-300 rounded-md px-4 py-2 border focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label for="rol" class="block text-sm font-medium text-gray-600">Rol WordPress</label>
+          <input type="text" name="rol" id="rol" value="subscriber" readonly
+                 class="mt-1 w-full bg-gray-100 border-gray-300 rounded-md px-4 py-2 border">
+        </div>
+        <div class="md:col-span-2" id="rolesContainer">
+          <!-- Selects de roles dinámicos -->
+        </div>
+        <div>
+          <label for="cod_profesional" class="block text-sm font-medium text-gray-600">Código Profesional</label>
+          <input type="text" name="cod_profesional" id="cod_profesional"
+                 class="mt-1 w-full border-gray-300 rounded-md px-4 py-2 border focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label for="nombre" class="block text-sm font-medium text-gray-600">Nombre</label>
+          <input type="text" name="nombre" id="nombre"
+                 class="mt-1 w-full border-gray-300 rounded-md px-4 py-2 border focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label for="apellido" class="block text-sm font-medium text-gray-600">Apellido</label>
+          <input type="text" name="apellido" id="apellido"
+                 class="mt-1 w-full border-gray-300 rounded-md px-4 py-2 border focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div class="md:col-span-2">
+          <label for="alias" class="block text-sm font-medium text-gray-600">Alias</label>
+          <input type="text" name="alias" id="alias" readonly
+                 class="mt-1 w-full bg-gray-100 border-gray-300 rounded-md px-4 py-2 border">
+        </div>
+      </div>
+      <div class="pt-4 text-center">
+        <button type="submit"
+                class="bg-yellow-600 text-white py-2 px-6 rounded-md hover:bg-yellow-700 transition duration-300">
+          Guardar Cambios
+        </button>
+      </div>
+    </form>
+  </div>
 
+  <script type="module">
     let rolesDisponibles = [];
-    const rolesContainer = document.getElementById('rolesContainer');
 
     async function fetchRolesDisponibles() {
       const res = await fetch('/api/usuarios/roles_suite');
@@ -36,7 +74,7 @@
 
     function crearSelectRol(valorInicial = "") {
       const select = document.createElement('select');
-      select.className = 'select-rol';
+      select.className = 'mt-2 mb-2 w-full border-gray-300 rounded-md px-4 py-2 border focus:ring-2 focus:ring-blue-500';
       select.name = 'roles_suite[]';
 
       const defaultOption = document.createElement('option');
@@ -52,85 +90,43 @@
         select.appendChild(option);
       });
 
-      select.addEventListener('change', () => {
-        const selects = Array.from(rolesContainer.querySelectorAll('select'));
-        const values = selects.map(s => s.value).filter(v => v !== "");
-        if (values.length === selects.length) crearSelectRol();
-      });
-
-      rolesContainer.appendChild(select);
+      return select;
     }
 
-    document.addEventListener('DOMContentLoaded', async () => {
+    async function cargarRolesDelUsuario() {
       await fetchRolesDisponibles();
-      cargarRolesSuite();
+      const container = document.getElementById('rolesContainer');
+      const res = await fetch('/api/usuarios/roles_asignados'); // ruta simulada
+      const rolesAsignados = await res.json();
 
-      const form = document.getElementById('modificarForm');
-
-      const actualizarAlias = () => {
-        const nombre = form.nombre.value.trim();
-        const apellido = form.apellido.value.trim();
-        form.alias.value = `${nombre} ${apellido}`.trim();
-      };
-      form.nombre.addEventListener('input', actualizarAlias);
-      form.apellido.addEventListener('input', actualizarAlias);
-
-      const params = new URLSearchParams(window.location.search);
-      const userParam = params.get("username");
-
-      if (userParam) {
-        const user = encodeURIComponent(userParam.trim());
-        try {
-          const res = await fetch(`/api/usuarios/${user}`);
-          if (res.ok) {
-            const u = await res.json();
-            form.username.value = u.username || '';
-            form.password.value = ''; // Nunca mostrar contraseña
-            form.email.value = u.email || '';
-            form.rol.value = u.rol || '';
-            form.cod_profesional.value = u.cod_profesional || '';
-            form.nombre.value = u.nombre || '';
-            form.apellido.value = u.apellido || '';
-            form.alias.value = u.alias || '';
-
-            // Cargar roles actuales
-            const rolesActuales = u.rol_suite || ''; // por ejemplo: "4,26"
-            const listaRoles = rolesActuales.split(',').filter(Boolean);
-            listaRoles.forEach(r => crearSelectRol(r));
-            crearSelectRol(); // uno vacío extra
-          }
-        } catch (err) {
-          form.username.value = userParam.trim();
-        }
-      }
-
-      form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const formData = new FormData(form);
-
-        const rolesSeleccionados = Array.from(document.querySelectorAll('.select-rol'))
-          .map(s => s.value)
-          .filter(v => v !== "");
-
-        formData.set("rol_suite", rolesSeleccionados.join(','));
-
-        const datos = Object.fromEntries(formData.entries());
-
-        const res = await fetch('/api/usuarios/modificar', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(datos)
-        });
-
-        if (res.ok) {
-          alert("Usuario modificado");
-        } else {
-          alert("Error al modificar");
-        }
+      rolesAsignados.forEach((rol) => {
+        const select = crearSelectRol(rol);
+        container.appendChild(select);
       });
+
+      if (rolesAsignados.length === 0) {
+        container.appendChild(crearSelectRol());
+      }
+    }
+
+    cargarRolesDelUsuario();
+  </script>
+
+  <script>
+    document.getElementById('modificarForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(e.target).entries());
+      const res = await fetch('/api/usuarios', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      if (res.ok) {
+        alert('Usuario modificado correctamente');
+      } else {
+        alert('Error al modificar el usuario');
+      }
     });
   </script>
-  <script src="header.js"></script>
-  <script src="logout.js"></script>
 </body>
 </html>
