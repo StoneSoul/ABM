@@ -3,16 +3,44 @@
 <head>
   <meta charset="UTF-8">
   <title>Panel de Administración</title>
-  <link rel="stylesheet" href="styles.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="header.js" defer></script>
 </head>
-<body>
+<body class="bg-gray-100 min-h-screen flex flex-col">
   <div id="header-placeholder"></div>
-  <main>
-  <h2>Bienvenido al ABM</h2>
-  <p>Seleccione una opción del menú para comenzar.</p>
+  <main class="flex-1 flex items-center justify-center p-6">
+    <div class="bg-white shadow-md rounded-lg p-10 max-w-xl text-center">
+      <h2 class="text-3xl font-bold text-gray-800 mb-4">Bienvenido al Panel ABM</h2>
+      <p class="text-gray-600 mb-6">Seleccione una opción del menú superior para comenzar.</p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <a href="crear.html"
+           class="block bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-md transition text-lg font-medium">
+          Crear Usuario
+        </a>
+        <a href="usuarios.html"
+           class="block bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-md transition text-lg font-medium">
+          Listar Usuarios
+        </a>
+        <a href="registros.html"
+           class="block bg-indigo-600 hover:bg-indigo-700 text-white py-3 px-6 rounded-md transition text-lg font-medium">
+          Ver Registros
+        </a>
+        <button onclick="cerrarSesion()"
+                class="block bg-red-500 hover:bg-red-600 text-white py-3 px-6 rounded-md transition text-lg font-medium">
+          Cerrar Sesión
+        </button>
+      </div>
+    </div>
   </main>
   <div id="footer-placeholder"></div>
-  <script src="header.js"></script>
-  <script src="logout.js"></script>
+
+  <script>
+    function cerrarSesion() {
+      fetch('/api/auth/logout', { method: 'POST' }).then(() => {
+        window.location.href = '/login.html';
+      });
+    }
+  </script>
 </body>
 </html>

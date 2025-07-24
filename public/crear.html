@@ -5,86 +5,91 @@
   <title>Crear Usuario</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="header.js" defer></script>
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center py-8">
-  <div class="w-full max-w-2xl bg-white shadow-md rounded-lg p-8">
-    <h2 class="text-2xl font-bold text-center mb-6 text-gray-700">Crear Nuevo Usuario</h2>
-    <form id="crearForm" class="space-y-4">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label for="username" class="block text-sm font-medium text-gray-600">Usuario</label>
-          <input type="text" name="username" id="username" required
-                 class="mt-1 w-full border-gray-300 rounded-md px-4 py-2 border focus:ring-2 focus:ring-blue-500">
+<body class="bg-gray-100 min-h-screen flex flex-col">
+  <div id="header-placeholder"></div>
+  <main class="flex-1 p-4 max-w-7xl mx-auto w-full">
+    <div class="w-full max-w-2xl bg-white shadow-md rounded-lg p-8">
+      <h2 class="text-2xl font-bold text-center mb-6 text-gray-700">Crear Nuevo Usuario</h2>
+      <form id="crearForm" class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label for="username" class="block text-sm font-medium text-gray-600">Usuario</label>
+            <input type="text" name="username" id="username" required
+                   class="mt-1 w-full border-gray-300 rounded-md px-4 py-2 border focus:ring-2 focus:ring-blue-500">
+          </div>
+          <div>
+            <label for="password" class="block text-sm font-medium text-gray-600">Clave</label>
+            <input type="password" name="password" id="password" required
+                   class="mt-1 w-full border-gray-300 rounded-md px-4 py-2 border focus:ring-2 focus:ring-blue-500">
+          </div>
+          <div>
+            <label for="email" class="block text-sm font-medium text-gray-600">Email</label>
+            <input type="email" name="email" id="email" required
+                   class="mt-1 w-full border-gray-300 rounded-md px-4 py-2 border focus:ring-2 focus:ring-blue-500">
+          </div>
+          <div>
+            <label for="rol" class="block text-sm font-medium text-gray-600">Rol WordPress</label>
+            <input type="text" name="rol" id="rol" value="subscriber" readonly
+                   class="mt-1 w-full border-gray-300 rounded-md px-4 py-2 bg-gray-100 border">
+          </div>
+          <div>
+            <label for="rol_suite" class="block text-sm font-medium text-gray-600">Rol en Suite</label>
+            <select name="rol_suite" id="rol_suite" required
+                    class="mt-1 w-full border-gray-300 rounded-md px-4 py-2 border focus:ring-2 focus:ring-blue-500">
+              <option value="">Cargando roles...</option>
+            </select>
+          </div>
+          <div>
+            <label for="cod_profesional" class="block text-sm font-medium text-gray-600">Código Profesional</label>
+            <input type="text" name="cod_profesional" id="cod_profesional"
+                   class="mt-1 w-full border-gray-300 rounded-md px-4 py-2 border focus:ring-2 focus:ring-blue-500">
+          </div>
+          <div>
+            <label for="nombre" class="block text-sm font-medium text-gray-600">Nombre</label>
+            <input type="text" name="nombre" id="nombre"
+                   class="mt-1 w-full border-gray-300 rounded-md px-4 py-2 border focus:ring-2 focus:ring-blue-500">
+          </div>
+          <div>
+            <label for="apellido" class="block text-sm font-medium text-gray-600">Apellido</label>
+            <input type="text" name="apellido" id="apellido"
+                   class="mt-1 w-full border-gray-300 rounded-md px-4 py-2 border focus:ring-2 focus:ring-blue-500">
+          </div>
+          <div class="md:col-span-2">
+            <label for="alias" class="block text-sm font-medium text-gray-600">Alias</label>
+            <input type="text" name="alias" id="alias"
+                   class="mt-1 w-full border-gray-300 rounded-md px-4 py-2 border focus:ring-2 focus:ring-blue-500">
+          </div>
         </div>
-        <div>
-          <label for="password" class="block text-sm font-medium text-gray-600">Clave</label>
-          <input type="password" name="password" id="password" required
-                 class="mt-1 w-full border-gray-300 rounded-md px-4 py-2 border focus:ring-2 focus:ring-blue-500">
+        <div class="pt-4 text-center">
+          <button type="submit"
+                  class="bg-green-600 text-white py-2 px-6 rounded-md hover:bg-green-700 transition duration-300">
+            Guardar Usuario
+          </button>
         </div>
-        <div>
-          <label for="email" class="block text-sm font-medium text-gray-600">Email</label>
-          <input type="email" name="email" id="email" required
-                 class="mt-1 w-full border-gray-300 rounded-md px-4 py-2 border focus:ring-2 focus:ring-blue-500">
-        </div>
-        <div>
-          <label for="rol" class="block text-sm font-medium text-gray-600">Rol WordPress</label>
-          <input type="text" name="rol" id="rol" value="subscriber" readonly
-                 class="mt-1 w-full border-gray-300 rounded-md px-4 py-2 bg-gray-100 border">
-        </div>
-        <div>
-          <label for="rol_suite" class="block text-sm font-medium text-gray-600">Rol en Suite</label>
-          <select name="rol_suite" id="rol_suite" required
-                  class="mt-1 w-full border-gray-300 rounded-md px-4 py-2 border focus:ring-2 focus:ring-blue-500">
-            <option value="">Cargando roles...</option>
-          </select>
-        </div>
-        <div>
-          <label for="cod_profesional" class="block text-sm font-medium text-gray-600">Código Profesional</label>
-          <input type="text" name="cod_profesional" id="cod_profesional"
-                 class="mt-1 w-full border-gray-300 rounded-md px-4 py-2 border focus:ring-2 focus:ring-blue-500">
-        </div>
-        <div>
-          <label for="nombre" class="block text-sm font-medium text-gray-600">Nombre</label>
-          <input type="text" name="nombre" id="nombre"
-                 class="mt-1 w-full border-gray-300 rounded-md px-4 py-2 border focus:ring-2 focus:ring-blue-500">
-        </div>
-        <div>
-          <label for="apellido" class="block text-sm font-medium text-gray-600">Apellido</label>
-          <input type="text" name="apellido" id="apellido"
-                 class="mt-1 w-full border-gray-300 rounded-md px-4 py-2 border focus:ring-2 focus:ring-blue-500">
-        </div>
-        <div class="md:col-span-2">
-          <label for="alias" class="block text-sm font-medium text-gray-600">Alias</label>
-          <input type="text" name="alias" id="alias"
-                 class="mt-1 w-full border-gray-300 rounded-md px-4 py-2 border focus:ring-2 focus:ring-blue-500">
-        </div>
-      </div>
-      <div class="pt-4 text-center">
-        <button type="submit"
-                class="bg-green-600 text-white py-2 px-6 rounded-md hover:bg-green-700 transition duration-300">
-          Guardar Usuario
-        </button>
-      </div>
-    </form>
-  </div>
+      </form>
+    </div>
 
-  <script src="cargarRolesSuite.js"></script>
-  <script>
-    document.getElementById('crearForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const data = Object.fromEntries(new FormData(e.target).entries());
-      const res = await fetch('/api/usuarios', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
+    <script src="cargarRolesSuite.js"></script>
+    <script>
+      document.getElementById('crearForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const data = Object.fromEntries(new FormData(e.target).entries());
+        const res = await fetch('/api/usuarios', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        if (res.ok) {
+          alert('Usuario creado correctamente');
+          e.target.reset();
+        } else {
+          alert('Error al crear el usuario');
+        }
       });
-      if (res.ok) {
-        alert('Usuario creado correctamente');
-        e.target.reset();
-      } else {
-        alert('Error al crear el usuario');
-      }
-    });
-  </script>
+    </script>
+  </main>
+  <div id="footer-placeholder"></div>
 </body>
 </html>

@@ -2,70 +2,73 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Registros de Contraseña</title>
+  <title>Registros</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="header.js" defer></script>
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col items-center">
-  <div class="w-full max-w-6xl p-6">
+<body class="bg-gray-100 min-h-screen flex flex-col">
+  <div id="header-placeholder"></div>
+  <main class="flex-1 p-4 max-w-6xl mx-auto w-full">
     <h2 class="text-3xl font-bold text-center mb-6 text-gray-700">Registros de Cambios de Contraseña</h2>
 
     <input type="text" id="buscadorReg" placeholder="Buscar..."
            class="mb-4 w-full max-w-md mx-auto block border border-gray-300 rounded-md px-4 py-2 focus:ring-2 focus:ring-blue-500" />
 
-    <div class="overflow-x-auto rounded-lg shadow">
-      <table id="tablaRegistros" class="min-w-full divide-y divide-gray-200 bg-white">
-        <thead class="bg-gray-100 text-xs text-gray-600 uppercase">
+    <div class="overflow-x-auto rounded-lg shadow border border-gray-200 bg-white">
+      <table id="tablaRegistros" class="min-w-full divide-y divide-gray-200 text-sm text-gray-800">
+        <thead class="bg-gray-100 text-xs text-gray-600 uppercase tracking-wider">
           <tr>
-            <th class="px-4 py-2">Usuario</th>
-            <th class="px-4 py-2">Cambiado por</th>
-            <th class="px-4 py-2">Fecha</th>
+            <th class="px-4 py-3 text-left">Usuario</th>
+            <th class="px-4 py-3 text-left">Cambiado por</th>
+            <th class="px-4 py-3 text-left">Fecha</th>
           </tr>
         </thead>
-        <tbody class="text-sm text-gray-700 divide-y divide-gray-100">
-          <!-- Se rellena dinámicamente -->
+        <tbody class="divide-y divide-gray-100">
+          <!-- generado dinámicamente -->
         </tbody>
       </table>
     </div>
-  </div>
 
-  <script>
-    function formatearFechaSimple(fechaStr) {
-      if (!fechaStr || typeof fechaStr !== 'string') return '—';
-      const cleanStr = fechaStr.includes('T') ? fechaStr.replace('T', ' ').split('.')[0] : fechaStr;
-      const [fecha, hora] = cleanStr.split(' ');
-      if (!fecha || !hora) return fechaStr;
-      const [a, m, d] = fecha.split('-');
-      return `${d}/${m}/${a} - ${hora}`;
-    }
-
-    async function cargarRegistros() {
-      const q = document.getElementById('buscadorReg').value;
-      const res = await fetch('/api/registros' + (q ? ('?q=' + encodeURIComponent(q)) : ''));
-      const datos = await res.json();
-      const tbody = document.querySelector('#tablaRegistros tbody');
-      tbody.innerHTML = '';
-
-      for (const r of datos) {
-        const fila = document.createElement('tr');
-
-        const td = (text) => {
-          const cell = document.createElement('td');
-          cell.className = "px-4 py-2";
-          cell.textContent = text;
-          return cell;
-        };
-
-        fila.appendChild(td(r.username));
-        fila.appendChild(td(r.changed_by));
-        fila.appendChild(td(formatearFechaSimple(r.changed_at)));
-
-        tbody.appendChild(fila);
+    <script>
+      function formatearFechaSimple(fechaStr) {
+        if (!fechaStr || typeof fechaStr !== 'string') return '—';
+        const cleanStr = fechaStr.includes('T') ? fechaStr.replace('T', ' ').split('.')[0] : fechaStr;
+        const [fecha, hora] = cleanStr.split(' ');
+        if (!fecha || !hora) return fechaStr;
+        const [a, m, d] = fecha.split('-');
+        return `${d}/${m}/${a} - ${hora}`;
       }
-    }
 
-    document.getElementById('buscadorReg').addEventListener('input', cargarRegistros);
-    cargarRegistros();
-  </script>
+      async function cargarRegistros() {
+        const q = document.getElementById('buscadorReg').value;
+        const res = await fetch('/api/registros' + (q ? ('?q=' + encodeURIComponent(q)) : ''));
+        const datos = await res.json();
+        const tbody = document.querySelector('#tablaRegistros tbody');
+        tbody.innerHTML = '';
+
+        for (const r of datos) {
+          const fila = document.createElement('tr');
+
+          const td = (text) => {
+            const cell = document.createElement('td');
+            cell.className = "px-4 py-2";
+            cell.textContent = text;
+            return cell;
+          };
+
+          fila.appendChild(td(r.username));
+          fila.appendChild(td(r.changed_by));
+          fila.appendChild(td(formatearFechaSimple(r.changed_at)));
+
+          tbody.appendChild(fila);
+        }
+      }
+
+      document.getElementById('buscadorReg').addEventListener('input', cargarRegistros);
+      cargarRegistros();
+    </script>
+  </main>
+  <div id="footer-placeholder"></div>
 </body>
 </html>

@@ -1,4 +1,5 @@
-export async function cargarRolesSuite() {
+// cargarRolesSuite.js
+document.addEventListener('DOMContentLoaded', async () => {
   try {
     const res = await fetch('api/usuarios/roles_suite');
     const roles = await res.json();
@@ -8,8 +9,8 @@ export async function cargarRolesSuite() {
 
     roles.forEach(rol => {
       const option = document.createElement('option');
-      option.value = rol.value;           // ID del rol
-      option.textContent = rol.label;     // "1 : Administrador"
+      option.value = rol.value;
+      option.textContent = rol.label;
       select.appendChild(option);
     });
   } catch (err) {
@@ -17,4 +18,4 @@ export async function cargarRolesSuite() {
     const select = document.getElementById('rol_suite');
     select.innerHTML = '<option value="">Error al cargar</option>';
   }
-}
+});

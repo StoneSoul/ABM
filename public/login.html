@@ -1,49 +1,53 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
   <title>Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="header.js" defer></script>
 </head>
-<body class="bg-gray-100 flex items-center justify-center h-screen">
-  <div class="w-full max-w-md bg-white shadow-md rounded-lg p-8">
-    <h2 class="text-2xl font-bold mb-6 text-center text-gray-700">Ingreso al ABM</h2>
-    <form id="loginForm" class="space-y-4">
-      <div>
-        <label for="username" class="block text-sm font-medium text-gray-600">Usuario</label>
-        <input type="text" name="username" id="username" required
-               class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
-      </div>
-      <div>
-        <label for="password" class="block text-sm font-medium text-gray-600">Contraseña</label>
-        <input type="password" name="password" id="password" required
-               class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
-      </div>
-      <div>
-        <button type="submit"
-                class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-300">
-          Ingresar
-        </button>
-      </div>
-    </form>
-  </div>
-
-  <script>
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const data = Object.fromEntries(new FormData(e.target).entries());
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
+<body class="bg-gray-100 min-h-screen flex flex-col">
+  <div id="header-placeholder"></div>
+  <main class="flex-1 p-4 max-w-7xl mx-auto w-full">
+    <div class="w-full max-w-md bg-white shadow-md rounded-lg p-8 mx-auto">
+      <h2 class="text-2xl font-bold mb-6 text-center text-gray-700">Ingreso al Sistema</h2>
+      <form id="loginForm" class="space-y-4">
+        <div>
+          <label for="username" class="block text-sm font-medium text-gray-600">Usuario</label>
+          <input type="text" name="username" id="username" required
+                 class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+        <div>
+          <label for="password" class="block text-sm font-medium text-gray-600">Contraseña</label>
+          <input type="password" name="password" id="password" required
+                 class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+        <div>
+          <button type="submit"
+                  class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-300">
+            Ingresar
+          </button>
+        </div>
+      </form>
+    </div>
+    <script>
+      document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const data = Object.fromEntries(new FormData(e.target).entries());
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        if (res.ok) {
+          window.location.href = '/index.html';
+        } else {
+          alert('Credenciales incorrectas');
+        }
       });
-      if (res.ok) {
-        window.location.href = '/index.html';
-      } else {
-        alert('Credenciales incorrectas');
-      }
-    });
-  </script>
+    </script>
+  </main>
+  <div id="footer-placeholder"></div>
 </body>
 </html>
