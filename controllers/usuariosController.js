@@ -56,9 +56,9 @@ exports.crearUsuario = async (req, res, next) => {
       port: process.env.DB_PORT || 3306,
     });
     await connection.execute(
-      `INSERT INTO usuarios (username, password, email, rol, cod_profesional, nombre, apellido, nombre_completo, estado, fecha_alta, fecha_modificacion)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, NOW(), NOW())
-       ON DUPLICATE KEY UPDATE password=VALUES(password), email=VALUES(email), rol=VALUES(rol), cod_profesional=VALUES(cod_profesional), nombre=VALUES(nombre), apellido=VALUES(apellido), nombre_completo=VALUES(nombre_completo), fecha_modificacion=NOW()`,
+      `INSERT INTO usuarios (username, password, email, rol, cod_profesional, nombre, apellido, nombre_completo, rol_suite, estado, fecha_alta, fecha_modificacion)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, NOW(), NOW())
+       ON DUPLICATE KEY UPDATE password=VALUES(password), email=VALUES(email), rol=VALUES(rol), cod_profesional=VALUES(cod_profesional), nombre=VALUES(nombre), apellido=VALUES(apellido), nombre_completo=VALUES(nombre_completo), rol_suite=VALUES(rol_suite), fecha_modificacion=NOW()`,
       [
         datos.username,
         datos.password,
@@ -68,6 +68,7 @@ exports.crearUsuario = async (req, res, next) => {
         datos.nombre || '',
         datos.apellido || '',
         datos.alias || datos.username,
+        datos.rol_suite || '',
       ]
     );
     await connection.end();
@@ -131,7 +132,7 @@ exports.obtenerUsuario = async (req, res, next) => {
       port: process.env.DB_PORT || 3306,
     });
     const [rows] = await connection.execute(
-      `SELECT username, password, email, rol, cod_profesional, nombre, apellido, nombre_completo AS alias
+      `SELECT username, password, email, rol, rol_suite, cod_profesional, nombre, apellido, nombre_completo AS alias
        FROM usuarios WHERE username = ?`,
       [usernameParam]
     );
@@ -192,7 +193,7 @@ exports.listarUsuarios = async (req, res, next) => {
     });
 
     const [rows] = await connection.execute(
-      `SELECT username, email, nombre_completo, rol, cod_profesional, estado
+      `SELECT username, email, nombre_completo, rol, rol_suite, cod_profesional, estado
        FROM usuarios
        ORDER BY fecha_alta DESC`
     );

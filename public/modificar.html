@@ -13,9 +13,8 @@
     <input type="text" name="username" placeholder="Usuario" required><br>
     <input type="password" name="password" placeholder="Nueva clave"><br>
     <input type="email" name="email" placeholder="Email"><br>
+    <div id="rolesContainer"></div><br>
     <input type="text" name="rol" value="subscriber" readonly><br>
-    <select name="rol_suite" id="rol_suite" required>
-    <option value="">Cargando roles...</option></select><br>
     <input type="text" name="cod_profesional" placeholder="Código profesional"><br>
     <input type="text" name="nombre" placeholder="Nombre"><br>
     <input type="text" name="apellido" placeholder="Apellido"><br>
@@ -26,11 +25,48 @@
   <div id="footer-placeholder"></div>
   <script type="module">
     import { cargarRolesSuite } from './cargarRolesSuite.js';
-  
-    document.addEventListener('DOMContentLoaded', () => {
+
+    let rolesDisponibles = [];
+    const rolesContainer = document.getElementById('rolesContainer');
+
+    async function fetchRolesDisponibles() {
+      const res = await fetch('/api/usuarios/roles_suite');
+      rolesDisponibles = await res.json();
+    }
+
+    function crearSelectRol(valorInicial = "") {
+      const select = document.createElement('select');
+      select.className = 'select-rol';
+      select.name = 'roles_suite[]';
+
+      const defaultOption = document.createElement('option');
+      defaultOption.value = "";
+      defaultOption.textContent = "— Seleccione un rol —";
+      select.appendChild(defaultOption);
+
+      rolesDisponibles.forEach((rol) => {
+        const option = document.createElement('option');
+        option.value = rol.value;
+        option.textContent = rol.label;
+        if (rol.value == valorInicial) option.selected = true;
+        select.appendChild(option);
+      });
+
+      select.addEventListener('change', () => {
+        const selects = Array.from(rolesContainer.querySelectorAll('select'));
+        const values = selects.map(s => s.value).filter(v => v !== "");
+        if (values.length === selects.length) crearSelectRol();
+      });
+
+      rolesContainer.appendChild(select);
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      await fetchRolesDisponibles();
       cargarRolesSuite();
 
       const form = document.getElementById('modificarForm');
+
       const actualizarAlias = () => {
         const nombre = form.nombre.value.trim();
         const apellido = form.apellido.value.trim();
@@ -38,47 +74,58 @@
       };
       form.nombre.addEventListener('input', actualizarAlias);
       form.apellido.addEventListener('input', actualizarAlias);
-  
+
       const params = new URLSearchParams(window.location.search);
       const userParam = params.get("username");
-  
+
       if (userParam) {
         const user = encodeURIComponent(userParam.trim());
-        fetch(`/api/usuarios/${user}`)
-          .then((r) => r.ok ? r.json() : null)
-          .then((u) => {
-            if (u) {
-              const form = document.getElementById('modificarForm');
-              form.username.value = u.username || '';
-              form.password.value = u.password || '';
-              form.email.value = u.email || '';
-              form.rol.value = u.rol || '';
-              form.cod_profesional.value = u.cod_profesional || '';
-              form.nombre.value = u.nombre || '';
-              form.apellido.value = u.apellido || '';
-              form.alias.value = u.alias || '';
-              form.rol_suite.value = u.rol_suite || '';
-            } else {
-              document.querySelector("input[name=username]").value = userParam.trim();
-            }
-          })
-          .catch(() => {
-            document.querySelector("input[name=username]").value = userParam.trim();
-          });
+        try {
+          const res = await fetch(`/api/usuarios/${user}`);
+          if (res.ok) {
+            const u = await res.json();
+            form.username.value = u.username || '';
+            form.password.value = ''; // Nunca mostrar contraseña
+            form.email.value = u.email || '';
+            form.rol.value = u.rol || '';
+            form.cod_profesional.value = u.cod_profesional || '';
+            form.nombre.value = u.nombre || '';
+            form.apellido.value = u.apellido || '';
+            form.alias.value = u.alias || '';
+
+            // Cargar roles actuales
+            const rolesActuales = u.rol_suite || ''; // por ejemplo: "4,26"
+            const listaRoles = rolesActuales.split(',').filter(Boolean);
+            listaRoles.forEach(r => crearSelectRol(r));
+            crearSelectRol(); // uno vacío extra
+          }
+        } catch (err) {
+          form.username.value = userParam.trim();
+        }
       }
-  
-      document.getElementById('modificarForm').addEventListener('submit', async (e) => {
+
+      form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const data = Object.fromEntries(new FormData(e.target).entries());
+        const formData = new FormData(form);
+
+        const rolesSeleccionados = Array.from(document.querySelectorAll('.select-rol'))
+          .map(s => s.value)
+          .filter(v => v !== "");
+
+        formData.set("rol_suite", rolesSeleccionados.join(','));
+
+        const datos = Object.fromEntries(formData.entries());
+
         const res = await fetch('/api/usuarios/modificar', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
+          body: JSON.stringify(datos)
         });
+
         if (res.ok) {
-          alert('Usuario modificado');
+          alert("Usuario modificado");
         } else {
-          alert('Error al modificar');
+          alert("Error al modificar");
         }
       });
     });
