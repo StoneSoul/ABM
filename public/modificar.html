@@ -75,6 +75,12 @@
         rolesDisponibles = await res.json();
       }
 
+      const params = new URLSearchParams(window.location.search);
+      const username = params.get('username') || '';
+      if (username) {
+        document.getElementById('username').value = username;
+      }
+
       function crearSelectRol(valorInicial = "") {
         const select = document.createElement('select');
         select.className = 'mt-2 mb-2 w-full border-gray-300 rounded-md px-4 py-2 border focus:ring-2 focus:ring-blue-500';
@@ -99,8 +105,9 @@
       async function cargarRolesDelUsuario() {
         await fetchRolesDisponibles();
         const container = document.getElementById('rolesContainer');
-        const res = await fetch('/api/usuarios/roles_asignados'); // ajustar si es necesario
-        const rolesAsignados = await res.json();
+        const res = await fetch(`/api/usuarios/${encodeURIComponent(username)}/roles_suite`);
+        const dato = await res.json();
+        const rolesAsignados = dato.rol_suite ? [dato.rol_suite] : [];
 
         rolesAsignados.forEach((rol) => {
           const select = crearSelectRol(rol);
@@ -119,8 +126,8 @@
       document.getElementById('modificarForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const data = Object.fromEntries(new FormData(e.target).entries());
-        const res = await fetch('/api/usuarios', {
-          method: 'PUT',
+        const res = await fetch('/api/usuarios/modificar', {
+          method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data)
         });

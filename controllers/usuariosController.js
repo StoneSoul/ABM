@@ -96,10 +96,11 @@ exports.modificarUsuario = async (req, res, next) => {
       database: process.env.DB_NAME,
       port: process.env.DB_PORT || 3306,
     });
-    const query = `UPDATE usuarios SET email = ?, rol = ?, cod_profesional = ?, nombre = ?, apellido = ?, nombre_completo = ?, fecha_modificacion = NOW()${datos.password ? ', password = ?' : ''} WHERE username = ?`;
+    const query = `UPDATE usuarios SET email = ?, rol = ?, rol_suite = ?, cod_profesional = ?, nombre = ?, apellido = ?, nombre_completo = ?, fecha_modificacion = NOW()${datos.password ? ', password = ?' : ''} WHERE username = ?`;
     const params = [
       datos.email || '',
       datos.rol || '',
+      datos.rol_suite || '',
       datos.cod_profesional || '',
       datos.nombre || '',
       datos.apellido || '',
@@ -141,6 +142,30 @@ exports.obtenerUsuario = async (req, res, next) => {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
     res.json(rows[0]);
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.obtenerRolSuiteUsuario = async (req, res, next) => {
+  try {
+    const usernameParam = (req.params.username || '').trim();
+    const connection = await mysql.createConnection({
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASS,
+      database: process.env.DB_NAME,
+      port: process.env.DB_PORT || 3306,
+    });
+    const [rows] = await connection.execute(
+      'SELECT rol_suite FROM usuarios WHERE username = ?',
+      [usernameParam]
+    );
+    await connection.end();
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+    res.json({ rol_suite: rows[0].rol_suite });
   } catch (error) {
     next(error);
   }
