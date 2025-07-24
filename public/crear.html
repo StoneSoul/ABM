@@ -36,7 +36,7 @@
           </div>
           <div>
             <label for="rol_suite" class="block text-sm font-medium text-gray-600">Rol en Suite</label>
-            <select name="rol_suite" id="rol_suite" required
+            <select name="rol_suite" id="rol_suite" multiple required
                     class="mt-1 w-full border-gray-300 rounded-md px-4 py-2 border focus:ring-2 focus:ring-blue-500">
               <option value="">Cargando roles...</option>
             </select>
@@ -75,7 +75,9 @@
     <script>
       document.getElementById('crearForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const data = Object.fromEntries(new FormData(e.target).entries());
+        const formData = new FormData(e.target);
+        const data = Object.fromEntries(formData.entries());
+        data.rol_suite = formData.getAll('rol_suite');
         const res = await fetch('/api/usuarios', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
