@@ -27,6 +27,7 @@ router.post(
 router.post('/wp-password-change', wpToken, usuariosController.passwordCambiadaDesdeWp);
 router.post('/estado', auth, usuariosController.cambiarEstado);
 router.get('/roles_suite', auth, usuariosController.obtenerRolesSuite);
+router.get('/:username/roles_suite', auth, usuariosController.obtenerRolSuiteUsuario);
 router.get('/:username', auth, usuariosController.obtenerUsuario);
 router.get('/', auth, usuariosController.listarUsuarios);
 
