@@ -81,51 +81,51 @@
         document.getElementById('username').value = username;
       }
 
-      function crearSelectRol(valorInicial = "") {
+      function crearSelectRol(valoresIniciales = []) {
         const select = document.createElement('select');
         select.className = 'mt-2 mb-2 w-full border-gray-300 rounded-md px-4 py-2 border focus:ring-2 focus:ring-blue-500';
-        select.name = 'roles_suite[]';
-
-        const defaultOption = document.createElement('option');
-        defaultOption.value = "";
-        defaultOption.textContent = "— Seleccione un rol —";
-        select.appendChild(defaultOption);
+        select.name = 'rol_suite';
+        select.multiple = true;
 
         rolesDisponibles.forEach((rol) => {
           const option = document.createElement('option');
           option.value = rol.value;
           option.textContent = rol.label;
-          if (rol.value == valorInicial) option.selected = true;
+          if (valoresIniciales.includes(String(rol.value))) option.selected = true;
           select.appendChild(option);
         });
 
         return select;
       }
 
-      async function cargarRolesDelUsuario() {
+      async function cargarDatosUsuario() {
         await fetchRolesDisponibles();
+        const res = await fetch(`/api/usuarios/${encodeURIComponent(username)}`);
+        if (!res.ok) return;
+        const usuario = await res.json();
+
+        document.getElementById('email').value = usuario.email || '';
+        document.getElementById('cod_profesional').value = usuario.cod_profesional || '';
+        document.getElementById('nombre').value = usuario.nombre || '';
+        document.getElementById('apellido').value = usuario.apellido || '';
+        document.getElementById('alias').value = usuario.alias || '';
+
+        const rolesAsignados = usuario.rol_suite
+          ? usuario.rol_suite.split(',').map((r) => r.trim())
+          : [];
         const container = document.getElementById('rolesContainer');
-        const res = await fetch(`/api/usuarios/${encodeURIComponent(username)}/roles_suite`);
-        const dato = await res.json();
-        const rolesAsignados = dato.rol_suite ? [dato.rol_suite] : [];
-
-        rolesAsignados.forEach((rol) => {
-          const select = crearSelectRol(rol);
-          container.appendChild(select);
-        });
-
-        if (rolesAsignados.length === 0) {
-          container.appendChild(crearSelectRol());
-        }
+        container.appendChild(crearSelectRol(rolesAsignados));
       }
 
-      cargarRolesDelUsuario();
+      cargarDatosUsuario();
     </script>
 
     <script>
       document.getElementById('modificarForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const data = Object.fromEntries(new FormData(e.target).entries());
+        const formData = new FormData(e.target);
+        const data = Object.fromEntries(formData.entries());
+        data.rol_suite = formData.getAll('rol_suite');
         const res = await fetch('/api/usuarios/modificar', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

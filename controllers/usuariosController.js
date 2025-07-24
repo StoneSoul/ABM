@@ -39,6 +39,10 @@ exports.crearUsuario = async (req, res, next) => {
   try {
     const datos = req.body;
 
+    if (Array.isArray(datos.rol_suite)) {
+      datos.rol_suite = datos.rol_suite.filter((r) => r).join(',');
+    }
+
     datos.alias = `${datos.nombre || ''} ${datos.apellido || ''}`.trim() || datos.alias || datos.username;
 
     if (datos.password) {
@@ -84,6 +88,9 @@ exports.crearUsuario = async (req, res, next) => {
 exports.modificarUsuario = async (req, res, next) => {
   try {
     const datos = req.body;
+    if (Array.isArray(datos.rol_suite)) {
+      datos.rol_suite = datos.rol_suite.filter((r) => r).join(',');
+    }
     if (datos.password) {
       datos.password = hashPassword(datos.password);
     }
@@ -180,9 +187,9 @@ exports.obtenerRolesSuite = async (req, res, next) => {
       database: process.env.DB_NAME_SUITE,
       port: process.env.DB_PORT || 3306
     });
-    
+
     const [rows] = await connection.execute(
-      `SELECT idrol AS value, CONCAT(idrol, ' : ', nombre) AS label, 'idrol' AS name FROM imc_suite_prueba.rol`
+      `SELECT idrol AS value, nombre AS label FROM imc_suite_prueba.rol`
     );
 
     res.json(rows);
