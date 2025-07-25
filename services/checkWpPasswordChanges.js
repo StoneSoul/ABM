@@ -38,31 +38,43 @@ async function checkChanges() {
   for (const row of wpUsers) {
     if (!row.password_hash) continue;
 
-    // Usar timestamp actual si no viene el changed_at
     const changedAt = row.changed_at || new Date().toISOString();
 
-    // Insertar en logs
-    await abmConn.execute(
-      'INSERT INTO password_logs (username, password, changed_by, changed_at) VALUES (?, ?, ?, ?)',
-      [row.username, row.password_hash, row.changed_by || 'user', changedAt]
+    // Evitar duplicados si ya existe un registro para este cambio
+    const [exists] = await abmConn.execute(
+      'SELECT 1 FROM password_logs WHERE username = ? AND changed_at = ? LIMIT 1',
+      [row.username, changedAt]
     );
+    if (exists.length) {
+      await wpConn.execute(
+        'UPDATE wp_usermeta SET meta_value = "" WHERE user_id = ? AND meta_key = "abm_last_pwd_hash"',
+        [row.user_id]
+      );
+      continue;
+    }
 
-    // Actualizar en ABM
-    await abmConn.execute(
-      'UPDATE usuarios SET password = ?, fecha_modificacion = NOW() WHERE username = ?',
-      [row.password_hash, row.username]
-    );
+    try {
+      await abmConn.execute(
+        'UPDATE usuarios SET password = ?, fecha_modificacion = NOW() WHERE username = ?',
+        [row.password_hash, row.username]
+      );
 
-    // Actualizar en Suite
-    await actualizarClave({ username: row.username, password: row.password_hash });
+      await actualizarClave({ username: row.username, password: row.password_hash });
 
-    // Limpiar el hash en WordPress para evitar reprocesar
-    await wpConn.execute(
-      'UPDATE wp_usermeta SET meta_value = "" WHERE user_id = ? AND meta_key = "abm_last_pwd_hash"',
-      [row.user_id]
-    );
+      await abmConn.execute(
+        'INSERT INTO password_logs (username, password, changed_by, changed_at) VALUES (?, ?, ?, ?)',
+        [row.username, row.password_hash, row.changed_by || 'user', changedAt]
+      );
 
-    console.log(`✔ Clave sincronizada para ${row.username}`);
+      await wpConn.execute(
+        'UPDATE wp_usermeta SET meta_value = "" WHERE user_id = ? AND meta_key = "abm_last_pwd_hash"',
+        [row.user_id]
+      );
+
+      console.log(`✔ Clave sincronizada para ${row.username}`);
+    } catch (err) {
+      console.error(`Error procesando ${row.username}:`, err);
+    }
   }
 
   await wpConn.end();
