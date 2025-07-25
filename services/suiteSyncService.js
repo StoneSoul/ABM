@@ -19,7 +19,7 @@ exports.syncToSuite = async ({ username, password, rol_suite }) => {
 
 exports.actualizarClave = async ({ username, password }) => {
   try {
-    await axios.post(`${SUITE_API}/updatePassword`, {
+    await axios.post(`${SUITE_API}/update-password`, {
       username,
       password,
     });
