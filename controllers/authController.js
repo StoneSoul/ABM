@@ -1,23 +1,14 @@
-const mysql = require('mysql2/promise');
 const hasher = require('wordpress-hash-node');
+const { pool } = require('../db');
 
 exports.login = async (req, res) => {
   try {
     const { username, password } = req.body;
 
-    const connection = await mysql.createConnection({
-      host: process.env.DB_HOST,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASS,
-      database: process.env.DB_NAME,
-      port: process.env.DB_PORT || 3306,
-    });
-
-    const [rows] = await connection.execute(
+    const [rows] = await pool.execute(
       'SELECT password, rol FROM usuarios WHERE username = ? AND estado = 1',
       [username]
     );
-    await connection.end();
 
     if (rows.length === 0) {
       throw new Error('No autorizado');
