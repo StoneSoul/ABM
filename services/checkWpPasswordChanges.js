@@ -1,6 +1,7 @@
 #!/usr/bin/env node
-const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '../.env') });
+// Las variables de entorno se cargan en `server.js` o mediante el entorno
+// de ejecución. Este archivo no debe depender de un `.env` local para
+// funcionar correctamente al ser ejecutado desde la aplicación principal.
 const mysql = require('mysql2/promise');
 const { actualizarClave } = require('./suiteSyncService');
 
@@ -20,6 +21,7 @@ const abmConfig = {
 };
 
 async function checkChanges() {
+  console.log('Iniciando verificación de cambios en WordPress...');
   const wpConn = await mysql.createConnection(wpConfig);
   const abmConn = await mysql.createConnection(abmConfig);
 
@@ -61,11 +63,15 @@ async function checkChanges() {
 
   await wpConn.end();
   await abmConn.end();
+  console.log('Verificación de cambios completada');
 }
 
 module.exports = { checkChanges };
 
 if (require.main === module) {
+  // Cargar variables de entorno desde un archivo local solo cuando se
+  // ejecuta directamente desde la línea de comandos.
+  require('dotenv').config();
   checkChanges()
     .then(() => console.log('Sincronización finalizada'))
     .catch((err) => {

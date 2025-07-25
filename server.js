@@ -32,13 +32,17 @@ const ensureLoggedIn = (req, res, next) => {
 require('dotenv').config();
 
 const intervalMs = parseInt(process.env.WP_SYNC_INTERVAL, 10) || 60000;
-setInterval(async () => {
+async function runWpSync() {
   try {
     await checkWpPasswordChanges();
   } catch (err) {
     console.error('Error al sincronizar contraseñas desde WordPress:', err);
   }
-}, intervalMs);
+}
+
+// Ejecutar al iniciar el servidor y luego según el intervalo configurado
+runWpSync();
+setInterval(runWpSync, intervalMs);
 
 const app = express();
 
