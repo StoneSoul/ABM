@@ -32,13 +32,15 @@
 
     <script>
       function formatearFechaSimple(fechaStr) {
-        if (!fechaStr || typeof fechaStr !== 'string') return '—';
-        const cleanStr = fechaStr.includes('T') ? fechaStr.replace('T', ' ').split('.')[0] : fechaStr;
-        const [fecha, hora] = cleanStr.split(' ');
-        if (!fecha || !hora) return fechaStr;
-        const [a, m, d] = fecha.split('-');
-        return `${d}/${m}/${a} - ${hora}`;
-      }
+  if (!fechaStr || typeof fechaStr !== 'string') return '—';
+
+  const cleanStr = fechaStr.replace('T', ' ').split('.')[0];
+  const [fecha, hora] = cleanStr.split(' ');
+  if (!fecha || !hora) return fechaStr;
+
+  const [a, m, d] = fecha.split('-');
+  return `${d}/${m}/${a} - ${hora}`;
+}
 
       async function cargarRegistros() {
         const q = document.getElementById('buscadorReg').value;
