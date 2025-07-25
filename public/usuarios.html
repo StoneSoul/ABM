@@ -36,8 +36,52 @@
       </table>
     </div>
 
+    <dialog id="rolesDialog" class="p-4 bg-white rounded-md shadow-lg">
+      <h3 class="text-lg font-semibold mb-2">Roles asignados</h3>
+      <ul id="rolesList" class="list-disc list-inside"></ul>
+      <div class="text-right mt-4">
+        <button id="closeDialog" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">Cerrar</button>
+      </div>
+    </dialog>
+
     <script>
+      let rolesMap = {};
+
+      async function cargarRolesSuite() {
+        if (Object.keys(rolesMap).length) return;
+        const res = await fetch('/api/usuarios/roles_suite');
+        const datos = await res.json();
+        datos.forEach(r => {
+          rolesMap[String(r.value)] = r.label;
+        });
+      }
+
+      function mostrarRoles(codigos) {
+        const dialog = document.getElementById('rolesDialog');
+        const lista = document.getElementById('rolesList');
+        lista.innerHTML = '';
+        if (!codigos) {
+          const li = document.createElement('li');
+          li.textContent = 'Sin roles';
+          lista.appendChild(li);
+        } else {
+          codigos.split(',').map(c => c.trim()).filter(Boolean).forEach(id => {
+            const li = document.createElement('li');
+            li.textContent = rolesMap[id] || id;
+            lista.appendChild(li);
+          });
+        }
+        dialog.showModal();
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('closeDialog').addEventListener('click', () => {
+          document.getElementById('rolesDialog').close();
+        });
+      });
+
       async function cargarUsuarios() {
+        await cargarRolesSuite();
         const res = await fetch('/api/usuarios');
         const datos = await res.json();
         const tbody = document.getElementById('contenidoTabla');
@@ -59,7 +103,14 @@
           fila.appendChild(td(u.email));
           fila.appendChild(td(u.nombre_completo));
           fila.appendChild(td(u.rol));
-          fila.appendChild(td(u.rol_suite));
+          const rolTd = document.createElement('td');
+          rolTd.className = 'px-4 py-2 text-center';
+          const verBtn = document.createElement('button');
+          verBtn.textContent = 'Ver';
+          verBtn.className = 'bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600';
+          verBtn.onclick = () => mostrarRoles(u.rol_suite);
+          rolTd.appendChild(verBtn);
+          fila.appendChild(rolTd);
           fila.appendChild(td(u.cod_profesional));
           fila.appendChild(td(estaActivo ? 'Activo' : 'Inactivo'));
 
