@@ -12,6 +12,7 @@ const ensureLoggedIn = (req, res, next) => {
     '/api/auth/login',
     '/logo.png',
     '/fondo-imc.png',
+    '/favicon.png',
     '/styles.css',
   ];
   if (req.session && req.session.authenticated) {
