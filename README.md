@@ -76,6 +76,9 @@ CREATE TABLE password_logs (
   changed_by VARCHAR(50) NOT NULL,
   changed_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Evitar registros duplicados por usuario y fecha de cambio
+ALTER TABLE password_logs ADD UNIQUE KEY unq_user_time (username, changed_at);
 ```
 
 Cada vez que WordPress notifica un cambio de clave se inserta un registro indicando si el cambio lo realizó un usuario o un administrador.

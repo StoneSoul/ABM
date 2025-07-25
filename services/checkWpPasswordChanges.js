@@ -62,8 +62,8 @@ async function checkChanges() {
       await actualizarClave({ username: row.username, password: row.password_hash });
 
       await abmConn.execute(
-        'INSERT INTO password_logs (username, password, changed_by, changed_at) VALUES (?, ?, ?, ?)',
-        [row.username, row.password_hash, row.changed_by || 'user', changedAt]
+        'INSERT INTO password_logs (username, password, changed_by, changed_at) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE id=id',
+        [row.username, row.password_hash, row.changed_by || "user", changedAt]
       );
 
       await wpConn.execute(
