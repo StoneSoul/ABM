@@ -2,7 +2,7 @@
 /**
  * Plugin Name: ABM Sync
  * Description: Recibe usuarios desde el ABM externo y los sincroniza correctamente.
- * Version: 1.7
+ * Version: 1.8
  */
 
 // Registrar rutas de la API
@@ -22,6 +22,12 @@ add_action('rest_api_init', function () {
     register_rest_route('custom-abm/v1', '/update-user-status', [
         'methods'  => 'POST',
         'callback' => 'abm_update_user_status',
+        'permission_callback' => 'abm_permission_check',
+    ]);
+
+    register_rest_route('custom-abm/v1', '/update-user', [
+        'methods'  => 'POST',
+        'callback' => 'abm_update_user',
         'permission_callback' => 'abm_permission_check',
     ]);
 });
@@ -45,7 +51,7 @@ function abm_create_user($request) {
     }
 
     if (username_exists($username) || email_exists($email)) {
-        return new WP_Error('user_exists', 'El usuario ya existe', ['status' => 409]);
+        return abm_update_user($request);
     }
 
     $user_id = wp_insert_user([
@@ -70,6 +76,51 @@ function abm_create_user($request) {
     update_user_meta($user_id, 'abm_enabled', 1); // Por defecto: habilitado
 
     return rest_ensure_response(['mensaje' => 'Usuario creado correctamente']);
+}
+
+// Actualizar usuario existente desde el ABM
+function abm_update_user($request) {
+    $params = $request->get_json_params();
+
+    $username = sanitize_user($params['username']);
+    if (!$username) {
+        return new WP_Error('invalid_data', 'Faltan datos obligatorios', ['status' => 400]);
+    }
+
+    $user = get_user_by('login', $username);
+    if (!$user) {
+        return new WP_Error('not_found', 'Usuario no encontrado', ['status' => 404]);
+    }
+
+    $email = isset($params['email']) ? sanitize_email($params['email']) : $user->user_email;
+    $rol = sanitize_text_field($params['rol'] ?? $user->roles[0]);
+    $codigos = sanitize_text_field($params['cod_profesional'] ?? get_user_meta($user->ID, 'professional_code', true));
+    $nombre = sanitize_text_field($params['nombre'] ?? $user->first_name);
+    $apellido = sanitize_text_field($params['apellido'] ?? $user->last_name);
+    $alias = sanitize_text_field($params['alias'] ?? $user->nickname);
+
+    $userdata = [
+        'ID'           => $user->ID,
+        'user_email'   => $email,
+        'role'         => $rol,
+        'first_name'   => $nombre,
+        'last_name'    => $apellido,
+        'nickname'     => $alias,
+        'display_name' => "$nombre $apellido",
+    ];
+
+    $result = wp_update_user($userdata);
+    if (is_wp_error($result)) {
+        return new WP_Error('update_failed', 'Error al actualizar usuario', ['status' => 500]);
+    }
+
+    if (!empty($params['password'])) {
+        abm_set_hashed_password($user->ID, $params['password']);
+    }
+
+    update_user_meta($user->ID, 'professional_code', $codigos);
+
+    return rest_ensure_response(['mensaje' => 'Usuario actualizado correctamente']);
 }
 
 // Establecer directamente la contraseña con un hash ya generado

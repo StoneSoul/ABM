@@ -31,8 +31,25 @@ exports.syncToWordpress = async ({
       }
     });
   } catch (error) {
-    console.error('Error sincronizando con WordPress:', error.response?.data || error);
-    throw error;
+    if (error.response && error.response.status === 409) {
+      await axios.post(`${WP_API}/update-user`, {
+        username,
+        password,
+        email,
+        rol,
+        cod_profesional,
+        nombre,
+        apellido,
+        alias: alias || username
+      }, {
+        headers: {
+          Authorization: `Bearer ${WP_TOKEN}`
+        }
+      });
+    } else {
+      console.error('Error sincronizando con WordPress:', error.response?.data || error);
+      throw error;
+    }
   }
 };
 
