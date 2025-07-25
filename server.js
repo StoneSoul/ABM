@@ -7,7 +7,13 @@ const registrosRouter = require('./routes/registros');
 const errorHandler = require('./middlewares/errorHandler');
 
 const ensureLoggedIn = (req, res, next) => {
-  const publicPaths = ['/login.html', '/api/auth/login'];
+  const publicPaths = [
+    '/login.html',
+    '/api/auth/login',
+    '/logo.png',
+    '/fondo-imc.png',
+    '/styles.css',
+  ];
   if (req.session && req.session.authenticated) {
     return next();
   }
