@@ -15,19 +15,20 @@
     <input type="text" id="buscador" placeholder="Buscar usuarios..."
            class="mb-4 w-full max-w-md mx-auto block border border-gray-300 rounded-md px-4 py-2 focus:ring-2 focus:ring-blue-500" />
 
-           <div class="rounded-lg shadow-lg border border-gray-200 bg-white w-full">
-            <table id="tablaUsuarios" class="table-auto w-full text-sm text-gray-800">
+    <!-- Tabla responsive sin scroll horizontal -->
+    <div class="rounded-lg shadow-lg border border-gray-200 bg-white w-full">
+      <table id="tablaUsuarios" class="table-auto w-full text-sm text-gray-800">
         <thead class="bg-gray-200 text-gray-700 uppercase text-xs tracking-wider">
           <tr>
-            <th class="px-4 py-3 text-left cursor-pointer" onclick="ordenar(0)">Usuario</th>
-            <th class="px-4 py-3 text-left cursor-pointer" onclick="ordenar(1)">Email</th>
-            <th class="px-4 py-3 text-left cursor-pointer" onclick="ordenar(2)">Nombre completo</th>
-            <th class="px-4 py-3 text-left cursor-pointer" onclick="ordenar(3)">Rol WP</th>
-            <th class="px-4 py-3 text-left cursor-pointer" onclick="ordenar(4)">Rol Suite</th>
-            <th class="px-4 py-3 text-left cursor-pointer" onclick="ordenar(5)">Código Profesional</th>
-            <th class="px-4 py-3 text-left cursor-pointer" onclick="ordenar(6)">Estado</th>
-            <th class="px-4 py-3 text-center">Acción</th>
-            <th class="px-4 py-3 text-center">Editar</th>
+            <th class="px-2 py-3 text-left cursor-pointer" onclick="ordenar(0)">Usuario</th>
+            <th class="px-2 py-3 text-left cursor-pointer" onclick="ordenar(1)">Email</th>
+            <th class="px-2 py-3 text-left cursor-pointer" onclick="ordenar(2)">Nombre completo</th>
+            <th class="px-2 py-3 text-left cursor-pointer" onclick="ordenar(3)">Rol WP</th>
+            <th class="px-2 py-3 text-left cursor-pointer" onclick="ordenar(4)">Rol Suite</th>
+            <th class="px-2 py-3 text-left cursor-pointer" onclick="ordenar(5)">Código Profesional</th>
+            <th class="px-2 py-3 text-left cursor-pointer" onclick="ordenar(6)">Estado</th>
+            <th class="px-2 py-3 text-center">Acción</th>
+            <th class="px-2 py-3 text-center">Editar</th>
           </tr>
         </thead>
         <tbody id="contenidoTabla" class="divide-y divide-gray-100">
@@ -94,7 +95,7 @@
 
           const td = (text) => {
             const cell = document.createElement('td');
-            cell.className = "px-4 py-2";
+            cell.className = "px-2 py-2 break-words";
             cell.textContent = text;
             return cell;
           };
@@ -103,44 +104,41 @@
           fila.appendChild(td(u.email));
           fila.appendChild(td(u.nombre_completo));
           fila.appendChild(td(u.rol));
+
           const rolTd = document.createElement('td');
-          rolTd.className = 'px-4 py-2 text-center';
+          rolTd.className = 'px-2 py-2 text-center';
           const verBtn = document.createElement('button');
           verBtn.textContent = 'Ver';
-          verBtn.className = 'bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600';
+          verBtn.className = 'bg-blue-500 text-white px-2 py-1 text-sm rounded hover:bg-blue-600';
           verBtn.onclick = () => mostrarRoles(u.rol_suite);
           rolTd.appendChild(verBtn);
           fila.appendChild(rolTd);
+
           fila.appendChild(td(u.cod_profesional));
           fila.appendChild(td(estaActivo ? 'Activo' : 'Inactivo'));
 
-          // Acción: activar/desactivar
           const accion = document.createElement('td');
-          accion.className = "px-4 py-2 text-center";
+          accion.className = "px-2 py-2 text-center";
           const btn = document.createElement('button');
           btn.textContent = estaActivo ? 'Desactivar' : 'Activar';
           btn.className = estaActivo
-            ? 'bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600'
-            : 'bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600';
+            ? 'bg-red-500 text-white px-2 py-1 text-sm rounded hover:bg-red-600'
+            : 'bg-green-500 text-white px-2 py-1 text-sm rounded hover:bg-green-600';
           btn.onclick = async () => {
             const confirmacion = confirm(`¿Deseas ${btn.textContent.toLowerCase()} este usuario?`);
             if (!confirmacion) return;
             const res = await fetch('/api/usuarios/estado', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                username: u.username,
-                estado: estaActivo ? 0 : 1
-              })
+              body: JSON.stringify({ username: u.username, estado: estaActivo ? 0 : 1 })
             });
             if (res.ok) cargarUsuarios();
           };
           accion.appendChild(btn);
           fila.appendChild(accion);
 
-          // Editar
           const editar = document.createElement('td');
-          editar.className = "px-4 py-2 text-center";
+          editar.className = "px-2 py-2 text-center";
           const link = document.createElement('a');
           link.href = `/modificar.html?username=${encodeURIComponent(u.username)}`;
           link.textContent = 'Editar';
