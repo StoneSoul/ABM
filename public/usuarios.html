@@ -74,10 +74,13 @@
           btn.onclick = async () => {
             const confirmacion = confirm(`¿Deseas ${btn.textContent.toLowerCase()} este usuario?`);
             if (!confirmacion) return;
-            const res = await fetch(`/api/usuarios/${u.id}/estado`, {
-              method: 'PATCH',
+            const res = await fetch('/api/usuarios/estado', {
+              method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ estado: estaActivo ? 'inactivo' : 'activo' })
+              body: JSON.stringify({
+                username: u.username,
+                estado: estaActivo ? 0 : 1
+              })
             });
             if (res.ok) cargarUsuarios();
           };
