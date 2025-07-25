@@ -216,6 +216,27 @@ function abm_track_admin_password_change($user_id, $old_user_data) {
 
     $hash = wp_hash_password($_POST['pass1']);
 
+    $base_url = defined('ABM_API_URL') ? ABM_API_URL : get_option('abm_api_url', '');
+    if ($base_url) {
+        $url = rtrim($base_url, '/') . '/api/usuarios/wp-password-change';
+        $token = defined('ABM_SYNC_TOKEN') ? ABM_SYNC_TOKEN : get_option('abm_sync_token');
+
+        $args = [
+            'body' => json_encode([
+                'username' => $old_user_data->user_login,
+                'password_hash' => $hash,
+                'changed_by' => $changed_by
+            ]),
+            'headers' => [
+                'Content-Type' => 'application/json',
+                'Authorization' => 'Bearer ' . $token,
+            ],
+            'timeout' => 10,
+        ];
+
+        wp_remote_post($url, $args);
+    }
+
     update_user_meta($user_id, 'abm_last_pwd_change', current_time('mysql'));
     update_user_meta($user_id, 'abm_last_pwd_changed_by', $changed_by);
     update_user_meta($user_id, 'abm_last_pwd_hash', $hash);
