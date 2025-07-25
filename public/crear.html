@@ -31,8 +31,10 @@
           </div>
           <div>
             <label for="rol" class="block text-sm font-medium text-gray-600">Rol WordPress</label>
-            <input type="text" name="rol" id="rol" value="subscriber" readonly
-                   class="mt-1 w-full border-gray-300 rounded-md px-4 py-2 bg-gray-100 border">
+            <select name="rol" id="rol" class="mt-1 w-full border-gray-300 rounded-md px-4 py-2 border focus:ring-2 focus:ring-blue-500">
+              <option value="subscriber" selected>Subscriber</option>
+              <option value="administrator">Administrator</option>
+            </select>
           </div>
           <div class="md:col-span-2" id="rolesContainer"></div>
           <div>
