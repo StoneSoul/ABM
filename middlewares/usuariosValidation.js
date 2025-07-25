@@ -8,7 +8,7 @@ const crearUsuarioValidator = [
 
 const modificarUsuarioValidator = [
   body('username').notEmpty().withMessage('El nombre de usuario es obligatorio'),
-  body('email').optional().isEmail().withMessage('Email no v\u00e1lido'),
+  body('email').optional({ checkFalsy: true }).isEmail().withMessage('Email no válido'),
 ];
 
 const validar = (req, res, next) => {

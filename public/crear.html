@@ -14,19 +14,20 @@
     <div class="w-full max-w-2xl bg-white shadow-md rounded-lg p-8">
       <h2 class="text-2xl font-bold text-center mb-6 text-gray-700">Crear Nuevo Usuario</h2>
       <form id="crearForm" class="space-y-4">
+        <p class="text-sm text-gray-500 mb-2">Los campos marcados con <span class="text-red-500">*</span> son obligatorios.</p>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label for="username" class="block text-sm font-medium text-gray-600">Usuario</label>
+            <label for="username" class="block text-sm font-medium text-gray-600">Usuario <span class="text-red-500">*</span></label>
             <input type="text" name="username" id="username" required
                    class="mt-1 w-full border-gray-300 rounded-md px-4 py-2 border focus:ring-2 focus:ring-blue-500">
           </div>
           <div>
-            <label for="password" class="block text-sm font-medium text-gray-600">Clave</label>
+            <label for="password" class="block text-sm font-medium text-gray-600">Clave <span class="text-red-500">*</span></label>
             <input type="password" name="password" id="password" required
                    class="mt-1 w-full border-gray-300 rounded-md px-4 py-2 border focus:ring-2 focus:ring-blue-500">
           </div>
           <div>
-            <label for="email" class="block text-sm font-medium text-gray-600">Email</label>
+            <label for="email" class="block text-sm font-medium text-gray-600">Email <span class="text-red-500">*</span></label>
             <input type="email" name="email" id="email" required
                    class="mt-1 w-full border-gray-300 rounded-md px-4 py-2 border focus:ring-2 focus:ring-blue-500">
           </div>
