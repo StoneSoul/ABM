@@ -1,6 +1,7 @@
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '../.env') });
 const mysql = require('mysql2/promise');
+const { pool: abmPool } = require('../db');
 const { unserialize } = require('php-serialize');
 
 // Conexión a WordPress
@@ -11,19 +12,12 @@ const wpConfig = {
   database: process.env.WP_DB,
 };
 
-// Conexión al ABM
-const abmConfig = {
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASS,
-  database: process.env.DB_NAME,
-  port: process.env.DB_PORT || 3306,
-};
+const wpPool = mysql.createPool(wpConfig);
 
 async function importarUsuarios() {
   try {
-    const wpConn = await mysql.createConnection(wpConfig);
-    const abmConn = await mysql.createConnection(abmConfig);
+    const wpConn = wpPool;
+    const abmConn = abmPool;
 
     const [rows] = await wpConn.execute(`
       SELECT 
@@ -79,8 +73,6 @@ async function importarUsuarios() {
       console.log('✅ Importado:', row.username);
     }
 
-    await wpConn.end();
-    await abmConn.end();
     console.log('\n✅✅ Importación finalizada correctamente');
     process.exit(0);
 

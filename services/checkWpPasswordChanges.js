@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 const mysql = require('mysql2/promise');
 const { actualizarClave } = require('./suiteSyncService');
+const { pool: abmPool } = require('../db');
 
 const wpConfig = {
   host: process.env.WP_HOST,
@@ -9,18 +10,12 @@ const wpConfig = {
   database: process.env.WP_DB,
 };
 
-const abmConfig = {
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASS,
-  database: process.env.DB_NAME,
-  port: process.env.DB_PORT || 3306,
-};
+const wpPool = mysql.createPool(wpConfig);
 
 async function checkChanges() {
   console.log('Iniciando verificación de cambios en WordPress...');
-  const wpConn = await mysql.createConnection(wpConfig);
-  const abmConn = await mysql.createConnection(abmConfig);
+  const wpConn = wpPool;
+  const abmConn = abmPool;
 
   const [wpUsers] = await wpConn.execute(`
     SELECT u.ID AS user_id,
@@ -77,8 +72,7 @@ async function checkChanges() {
     }
   }
 
-  await wpConn.end();
-  await abmConn.end();
+  // No cerramos los pools para poder reutilizarlos
   console.log('✔ Verificación de cambios completada');
 }
 
