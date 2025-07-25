@@ -23,49 +23,51 @@ async function checkChanges() {
   const abmConn = await mysql.createConnection(abmConfig);
 
   const [wpUsers] = await wpConn.execute(`
-    SELECT 
-      u.ID AS user_id,
-      u.user_login AS username,
-      pwd.meta_value AS password_hash,
-      ch.meta_value AS changed_at,
-      bywho.meta_value AS changed_by
+    SELECT u.ID AS user_id,
+           u.user_login AS username,
+           (SELECT meta_value FROM wp_usermeta WHERE user_id = u.ID AND meta_key = 'abm_last_pwd_change') AS changed_at,
+           (SELECT meta_value FROM wp_usermeta WHERE user_id = u.ID AND meta_key = 'abm_last_pwd_changed_by') AS changed_by,
+           (SELECT meta_value FROM wp_usermeta WHERE user_id = u.ID AND meta_key = 'abm_last_pwd_hash') AS password_hash
     FROM wp_users u
-    JOIN wp_usermeta pwd ON pwd.user_id = u.ID AND pwd.meta_key = 'abm_last_pwd_hash' AND pwd.meta_value != ''
-    LEFT JOIN wp_usermeta ch ON ch.user_id = u.ID AND ch.meta_key = 'abm_last_pwd_change'
-    LEFT JOIN wp_usermeta bywho ON bywho.user_id = u.ID AND bywho.meta_key = 'abm_last_pwd_changed_by'
+    WHERE EXISTS (
+      SELECT 1 FROM wp_usermeta
+      WHERE user_id = u.ID AND meta_key = 'abm_last_pwd_hash' AND meta_value != ''
+    )
   `);
 
   for (const row of wpUsers) {
-    const changedAt = row.changed_at || new Date().toISOString();
-    const changedBy = row.changed_by || 'user';
+    if (!row.password_hash) continue;
 
-    // Insertar en password_logs
+    // Usar timestamp actual si no viene el changed_at
+    const changedAt = row.changed_at || new Date().toISOString();
+
+    // Insertar en logs
     await abmConn.execute(
       'INSERT INTO password_logs (username, password, changed_by, changed_at) VALUES (?, ?, ?, ?)',
-      [row.username, row.password_hash, changedBy, changedAt]
+      [row.username, row.password_hash, row.changed_by || 'user', changedAt]
     );
 
-    // Actualizar contraseña en usuarios
+    // Actualizar en ABM
     await abmConn.execute(
       'UPDATE usuarios SET password = ?, fecha_modificacion = NOW() WHERE username = ?',
       [row.password_hash, row.username]
     );
 
-    // Enviar a suite
+    // Actualizar en Suite
     await actualizarClave({ username: row.username, password: row.password_hash });
 
-    // Limpiar hash en WordPress
+    // Limpiar el hash en WordPress para evitar reprocesar
     await wpConn.execute(
       'UPDATE wp_usermeta SET meta_value = "" WHERE user_id = ? AND meta_key = "abm_last_pwd_hash"',
       [row.user_id]
     );
 
-    console.log(`✅ Sincronizado ${row.username}`);
+    console.log(`✔ Clave sincronizada para ${row.username}`);
   }
 
   await wpConn.end();
   await abmConn.end();
-  console.log('Verificación de cambios completada');
+  console.log('✔ Verificación de cambios completada');
 }
 
 module.exports = { checkChanges };
@@ -73,9 +75,9 @@ module.exports = { checkChanges };
 if (require.main === module) {
   require('dotenv').config();
   checkChanges()
-    .then(() => console.log('Sincronización finalizada'))
+    .then(() => console.log('✔ Sincronización finalizada'))
     .catch((err) => {
-      console.error('Error verificando cambios:', err);
+      console.error('❌ Error verificando cambios:', err);
       process.exit(1);
     });
 }
