@@ -36,8 +36,12 @@ WP_HOST=
 WP_USER=
 WP_PASS=
 WP_DB=
+TZ=
 WP_SYNC_INTERVAL=
 ```
+
+`TZ` permite establecer la zona horaria que usará el servidor. Si no se define,
+se tomará `America/Argentina/Cordoba` por defecto.
 
 Ajusta cada valor según tu configuración local o de producción.
 

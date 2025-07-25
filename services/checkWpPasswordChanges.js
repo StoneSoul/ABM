@@ -3,6 +3,8 @@ const mysql = require('mysql2/promise');
 const { actualizarClave } = require('./suiteSyncService');
 const { pool: abmPool } = require('../db');
 
+process.env.TZ = process.env.TZ || 'America/Argentina/Cordoba';
+
 const wpConfig = {
   host: process.env.WP_HOST,
   user: process.env.WP_USER,
@@ -30,10 +32,13 @@ async function checkChanges() {
     )
   `);
 
+  const tz = process.env.TZ || 'America/Argentina/Cordoba';
+
   for (const row of wpUsers) {
     if (!row.password_hash) continue;
 
-    const changedAt = row.changed_at || new Date().toISOString();
+    const changedAt =
+      row.changed_at || new Date().toLocaleString('sv-SE', { timeZone: tz });
 
     // Evitar duplicados si ya existe un registro para este cambio
     const [exists] = await abmConn.execute(
