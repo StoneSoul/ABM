@@ -18,6 +18,7 @@ exports.syncToSuite = async ({ username, password, rol_suite }) => {
 };
 
 exports.actualizarUsuario = async ({ username, password, rol_suite }) => {
+  console.log('Actualizando usuario en Suite:', username);
   try {
     await axios.post(`${SUITE_API}/update-user`, {
       username,

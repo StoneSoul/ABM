@@ -2,7 +2,7 @@ const axios = require('axios');
 const { pool } = require('../db');
 const SUITE_API = process.env.SUITE_API;
 const { syncToWordpress, actualizarEstado: actualizarEstadoWp } = require('../services/wpSyncService');
-const { syncToSuite, actualizarClave, actualizarEstado: actualizarEstadoSuite } = require('../services/suiteSyncService');
+const { syncToSuite, actualizarClave, actualizarEstado: actualizarEstadoSuite, actualizarUsuario } = require('../services/suiteSyncService');
 const { hashPassword } = require('../services/passwordHashService');
 
 async function registrarCambioClave(username, password, changedBy) {
