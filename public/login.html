@@ -1,25 +1,38 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Login</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <title>Login - Instituto Modelo de Cardiología</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="header.js" defer></script>
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col">
-  <div id="header-placeholder"></div>
-  <main class="flex-1 p-4 max-w-7xl mx-auto w-full">
-    <div class="w-full max-w-md bg-white shadow-md rounded-lg p-8 mx-auto">
-      <h2 class="text-2xl font-bold mb-6 text-center text-gray-700">Ingreso al Sistema</h2>
+<body class="relative min-h-screen overflow-hidden">
+
+  <!-- Imagen de fondo desenfocada -->
+  <div class="absolute inset-0 z-0">
+    <img src="/fondo-imc.png" alt="Fondo IMC"
+         class="w-full h-full object-cover filter blur-md brightness-75" />
+  </div>
+
+  <!-- Contenido superpuesto -->
+  <div class="relative z-10 flex flex-col items-center justify-center min-h-screen px-4">
+
+    <!-- Logo -->
+    <div class="mb-6">
+      <img src="/logo.png" alt="Logo Instituto Modelo de Cardiología" class="h-24" />
+    </div>
+
+    <!-- Formulario de login -->
+    <div class="w-full max-w-md bg-white bg-opacity-90 shadow-xl rounded-lg p-8">
+      <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">Ingreso al Sistema</h2>
       <form id="loginForm" class="space-y-4">
         <div>
-          <label for="username" class="block text-sm font-medium text-gray-600">Usuario</label>
+          <label for="username" class="block text-sm font-medium text-gray-700">Usuario</label>
           <input type="text" name="username" id="username" required
                  class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
         </div>
         <div>
-          <label for="password" class="block text-sm font-medium text-gray-600">Contraseña</label>
+          <label for="password" class="block text-sm font-medium text-gray-700">Contraseña</label>
           <input type="password" name="password" id="password" required
                  class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
         </div>
@@ -31,23 +44,25 @@
         </div>
       </form>
     </div>
-    <script>
-      document.getElementById('loginForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const data = Object.fromEntries(new FormData(e.target).entries());
-        const res = await fetch('/api/auth/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
-        });
-        if (res.ok) {
-          window.location.href = '/index.html';
-        } else {
-          alert('Credenciales incorrectas');
-        }
+  </div>
+
+  <!-- Script -->
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(e.target).entries());
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
       });
-    </script>
-  </main>
-  <div id="footer-placeholder"></div>
+      if (res.ok) {
+        window.location.href = '/index.html';
+      } else {
+        alert('Credenciales incorrectas');
+      }
+    });
+  </script>
+
 </body>
 </html>
