@@ -63,6 +63,8 @@ async function checkChanges() {
   await abmConn.end();
 }
 
+module.exports = { checkChanges };
+
 if (require.main === module) {
   checkChanges()
     .then(() => console.log('Sincronización finalizada'))
