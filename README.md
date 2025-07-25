@@ -36,6 +36,7 @@ WP_HOST=
 WP_USER=
 WP_PASS=
 WP_DB=
+WP_SYNC_INTERVAL=
 ```
 
 Ajusta cada valor según tu configuración local o de producción.
@@ -113,3 +114,5 @@ recuperarla en caso de estar caído.
 El script `services/checkWpPasswordChanges.js` consulta esos valores
 directamente en la base de datos de WordPress, actualiza la tabla `usuarios`
 con la clave y registra cada modificación en `password_logs`.
+El servidor ejecuta este proceso de forma automática cada minuto (o según el
+valor definido en `WP_SYNC_INTERVAL`).

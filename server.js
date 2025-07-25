@@ -5,6 +5,7 @@ const usuariosRouter = require('./routes/usuarios');
 const authRouter = require('./routes/auth');
 const registrosRouter = require('./routes/registros');
 const errorHandler = require('./middlewares/errorHandler');
+const { checkChanges: checkWpPasswordChanges } = require('./services/checkWpPasswordChanges');
 
 const ensureLoggedIn = (req, res, next) => {
   const publicPaths = [
@@ -29,6 +30,15 @@ const ensureLoggedIn = (req, res, next) => {
   return res.redirect('/login.html');
 };
 require('dotenv').config();
+
+const intervalMs = parseInt(process.env.WP_SYNC_INTERVAL, 10) || 60000;
+setInterval(async () => {
+  try {
+    await checkWpPasswordChanges();
+  } catch (err) {
+    console.error('Error al sincronizar contraseñas desde WordPress:', err);
+  }
+}, intervalMs);
 
 const app = express();
 
