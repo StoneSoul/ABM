@@ -33,11 +33,9 @@
     <script>
       function formatearFechaSimple(fechaStr) {
   if (!fechaStr || typeof fechaStr !== 'string') return '—';
-
-  const cleanStr = fechaStr.replace('T', ' ').split('.')[0];
-  const [fecha, hora] = cleanStr.split(' ');
-  if (!fecha || !hora) return fechaStr;
-
+  const partes = fechaStr.split(' ');
+  if (partes.length !== 2) return fechaStr;
+  const [fecha, hora] = partes;
   const [a, m, d] = fecha.split('-');
   return `${d}/${m}/${a} - ${hora}`;
 }
