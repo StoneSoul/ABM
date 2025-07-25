@@ -32,16 +32,19 @@ exports.syncToWordpress = async ({
     });
   } catch (error) {
     if (error.response && error.response.status === 409) {
-      await axios.post(`${WP_API}/update-user`, {
+      const payload = {
         username,
-        password,
         email,
         rol,
         cod_profesional,
         nombre,
         apellido,
         alias: alias || username
-      }, {
+      };
+      if (password) {
+        payload.password = password;
+      }
+      await axios.post(`${WP_API}/update-user`, payload, {
         headers: {
           Authorization: `Bearer ${WP_TOKEN}`
         }
