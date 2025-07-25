@@ -64,33 +64,50 @@ exports.crearUsuario = async (req, res, next) => {
 exports.modificarUsuario = async (req, res, next) => {
   try {
     const datos = req.body;
+
     if (Array.isArray(datos.rol_suite)) {
       datos.rol_suite = datos.rol_suite.filter((r) => r).join(',');
     }
-    if (datos.password) {
-      datos.password = hashPassword(datos.password);
-    }
-    await syncToWordpress(datos);
-    await actualizarUsuario(datos);
-    const query = `UPDATE usuarios SET email = ?, rol = ?, rol_suite = ?, cod_profesional = ?, nombre = ?, apellido = ?, nombre_completo = ?, fecha_modificacion = NOW()${datos.password ? ', password = ?' : ''} WHERE username = ?`;
-    const params = [
+
+    const actualizaciones = [
+      'email = ?',
+      'rol = ?',
+      'rol_suite = ?',
+      'cod_profesional = ?',
+      'nombre = ?',
+      'apellido = ?',
+      'nombre_completo = ?'
+    ];
+
+    const valores = [
       datos.email || '',
       datos.rol || '',
       datos.rol_suite || '',
       datos.cod_profesional || '',
       datos.nombre || '',
       datos.apellido || '',
-      datos.alias || datos.username,
+      datos.alias || datos.username
     ];
-    if (datos.password) {
-      params.push(datos.password);
+
+    if (datos.password && datos.password.trim() !== '') {
+      datos.password = hashPassword(datos.password);
+      actualizaciones.push('password = ?');
+      valores.push(datos.password);
     }
-    params.push(datos.username);
-    await pool.execute(query, params);
-    if (datos.password) {
+
+    valores.push(datos.username);
+
+    const query = `UPDATE usuarios SET ${actualizaciones.join(', ')}, fecha_modificacion = NOW() WHERE username = ?`;
+
+    await syncToWordpress(datos);
+    await actualizarUsuario(datos);
+    await pool.execute(query, valores);
+
+    if (datos.password && datos.password.trim() !== '') {
       await registrarCambioClave(datos.username, datos.password, 'admin');
       await actualizarPassword(datos.username, datos.password);
     }
+
     res.json({ mensaje: 'Usuario modificado correctamente' });
   } catch (error) {
     next(error);
@@ -156,7 +173,6 @@ exports.passwordCambiadaDesdeWp = async (req, res, next) => {
   }
 };
 
-// ✅ NUEVA FUNCIÓN PARA LISTAR USUARIOS
 exports.listarUsuarios = async (req, res, next) => {
   try {
     const [rows] = await pool.execute(
