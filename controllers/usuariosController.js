@@ -71,7 +71,7 @@ exports.modificarUsuario = async (req, res, next) => {
       datos.password = hashPassword(datos.password);
     }
     await syncToWordpress(datos);
-    await syncToSuite(datos);
+    await actualizarUsuario(datos);
     const query = `UPDATE usuarios SET email = ?, rol = ?, rol_suite = ?, cod_profesional = ?, nombre = ?, apellido = ?, nombre_completo = ?, fecha_modificacion = NOW()${datos.password ? ', password = ?' : ''} WHERE username = ?`;
     const params = [
       datos.email || '',
