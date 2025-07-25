@@ -14,11 +14,16 @@ const ensureLoggedIn = (req, res, next) => {
     '/fondo-imc.png',
     '/favicon.png',
     '/styles.css',
+    '/api/usuarios/wp-password-change',
   ];
   if (req.session && req.session.authenticated) {
     return next();
   }
-  if (publicPaths.includes(req.path) || req.path.startsWith('/api/auth/login')) {
+  if (
+    publicPaths.includes(req.path) ||
+    req.path.startsWith('/api/auth/login') ||
+    req.path.startsWith('/api/usuarios/wp-password-change')
+  ) {
     return next();
   }
   return res.redirect('/login.html');
