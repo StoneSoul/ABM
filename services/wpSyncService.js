@@ -13,46 +13,53 @@ exports.syncToWordpress = async ({
   cod_profesional,
   nombre,
   apellido,
-  alias
+  alias,
 }) => {
+  const payload = {
+    username,
+    email,
+    rol,
+    cod_profesional,
+    nombre,
+    apellido,
+    alias: alias || username,
+  };
+
   try {
-    await axios.post(`${WP_API}/create-user`, {
-      username,
-      password,
-      email,
-      rol,
-      cod_profesional,
-      nombre,
-      apellido,
-      alias: alias || username // si no viene alias, usa username
-    }, {
-      headers: {
-        Authorization: `Bearer ${WP_TOKEN}`
+    if (password && email && rol) {
+      try {
+        await axios.post(
+          `${WP_API}/create-user`,
+          { ...payload, password },
+          {
+            headers: {
+              Authorization: `Bearer ${WP_TOKEN}`,
+            },
+          }
+        );
+        return;
+      } catch (err) {
+        if (!(err.response && err.response.status === 409)) {
+          throw err;
+        }
       }
+    }
+
+    if (password) {
+      payload.password = password;
+    }
+
+    await axios.post(`${WP_API}/update-user`, payload, {
+      headers: {
+        Authorization: `Bearer ${WP_TOKEN}`,
+      },
     });
   } catch (error) {
-    if (error.response && error.response.status === 409) {
-      const payload = {
-        username,
-        email,
-        rol,
-        cod_profesional,
-        nombre,
-        apellido,
-        alias: alias || username
-      };
-      if (password) {
-        payload.password = password;
-      }
-      await axios.post(`${WP_API}/update-user`, payload, {
-        headers: {
-          Authorization: `Bearer ${WP_TOKEN}`
-        }
-      });
-    } else {
-      console.error('Error sincronizando con WordPress:', error.response?.data || error);
-      throw error;
-    }
+    console.error(
+      'Error sincronizando con WordPress:',
+      error.response?.data || error
+    );
+    throw error;
   }
 };
 
