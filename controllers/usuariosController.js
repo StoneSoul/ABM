@@ -69,30 +69,41 @@ exports.modificarUsuario = async (req, res, next) => {
       datos.rol_suite = datos.rol_suite.filter((r) => r).join(',');
     }
 
-    const actualizaciones = [
-      'email = ?',
-      'rol = ?',
-      'rol_suite = ?',
-      'cod_profesional = ?',
-      'nombre = ?',
-      'apellido = ?',
-      'nombre_completo = ?'
-    ];
+    // Filtrar campos vacíos para evitar sobreescribir con valores en blanco
+    Object.keys(datos).forEach((key) => {
+      if (datos[key] === '' || datos[key] === null || datos[key] === undefined) {
+        delete datos[key];
+      }
+    });
 
-    const valores = [
-      datos.email || '',
-      datos.rol || '',
-      datos.rol_suite || '',
-      datos.cod_profesional || '',
-      datos.nombre || '',
-      datos.apellido || '',
-      datos.alias || datos.username
-    ];
+    const actualizaciones = [];
+    const valores = [];
+
+    const campos = {
+      email: 'email',
+      rol: 'rol',
+      rol_suite: 'rol_suite',
+      cod_profesional: 'cod_profesional',
+      nombre: 'nombre',
+      apellido: 'apellido',
+      alias: 'nombre_completo',
+    };
+
+    for (const [campo, columna] of Object.entries(campos)) {
+      if (datos[campo]) {
+        actualizaciones.push(`${columna} = ?`);
+        valores.push(datos[campo]);
+      }
+    }
 
     if (datos.password && datos.password.trim() !== '') {
       datos.password = hashPassword(datos.password);
       actualizaciones.push('password = ?');
       valores.push(datos.password);
+    }
+
+    if (actualizaciones.length === 0) {
+      return res.status(400).json({ mensaje: 'No hay datos para actualizar' });
     }
 
     valores.push(datos.username);

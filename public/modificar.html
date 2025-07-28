@@ -208,8 +208,22 @@
       document.getElementById('modificarForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
-        const data = Object.fromEntries(formData.entries());
-        data.rol_suite = formData.get('rol_suite').split(',').filter(Boolean);
+
+        const data = { username: formData.get('username').trim() };
+
+        ['password', 'email', 'rol', 'cod_profesional', 'nombre', 'apellido', 'alias']
+          .forEach((campo) => {
+            const valor = formData.get(campo);
+            if (valor && valor.trim() !== '') {
+              data[campo] = valor.trim();
+            }
+          });
+
+        const roles = formData.get('rol_suite');
+        if (roles && roles.trim() !== '') {
+          data.rol_suite = roles.split(',').filter(Boolean);
+        }
+
         const res = await fetch('/api/usuarios/modificar', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
