@@ -161,7 +161,7 @@ exports.obtenerRolSuiteUsuario = async (req, res, next) => {
 exports.obtenerRolesSuite = async (req, res, next) => {
   try {
     const [rows] = await pool.execute(
-      `SELECT idrol AS value, nombre AS label FROM imc_suite_prueba.rol`
+      `SELECT idrol AS value, nombre AS label FROM imc_suite.rol`
     );
 
     res.json(rows);
