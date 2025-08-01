@@ -4,12 +4,14 @@ const axios = require('axios');
 const SUITE_API = process.env.SUITE_API;
 
 
-exports.syncToSuite = async ({ username, password, rol_suite }) => {
+exports.syncToSuite = async ({ username, password, rol_suite, nombre, apellido }) => {
   try {
     await axios.post(`${SUITE_API}/create`, {
       username,
       password,
       rol_suite,
+      nombre,
+      apellido
     });
   } catch (error) {
     console.error('Error sincronizando con Suite:', error.response?.data || error);
