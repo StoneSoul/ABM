@@ -60,7 +60,7 @@ app.use('/api/registros', registrosRouter);
 app.get('/', (req, res) => res.redirect('/login.html'));
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3003;
 // Mostrar el puerto solo en modo debug para no contaminar los logs de producción
 if (process.env.DEBUG) {
   app.listen(PORT, () =>
