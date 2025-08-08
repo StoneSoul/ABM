@@ -1,8 +1,14 @@
 const hasher = require('wordpress-hash-node');
 const { pool } = require('../db');
+const { validationResult } = require('express-validator');
 
 exports.login = async (req, res) => {
   try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errores: errors.array() });
+    }
+
     const { username, password } = req.body;
 
     const [rows] = await pool.execute(
