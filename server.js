@@ -4,6 +4,8 @@ process.env.TZ = process.env.TZ || 'America/Argentina/Cordoba';
 const express = require('express');
 const path = require('path');
 const session = require('express-session');
+const MySQLStore = require('express-mysql-session')(session);
+const helmet = require('helmet');
 const usuariosRouter = require('./routes/usuarios');
 const authRouter = require('./routes/auth');
 const registrosRouter = require('./routes/registros');
@@ -45,12 +47,29 @@ setInterval(async () => {
 
 const app = express();
 
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'abm-secret',
-  resave: false,
-  saveUninitialized: false
-}));
+const sessionStore = new MySQLStore({
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+});
 
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || 'abm-secret',
+    resave: false,
+    saveUninitialized: false,
+    store: sessionStore,
+    cookie: {
+      secure: process.env.NODE_ENV === 'production',
+      httpOnly: true,
+      sameSite: 'lax',
+    },
+  })
+);
+
+app.use(helmet());
 app.use(express.json());
 app.use(ensureLoggedIn);
 app.use(express.static(path.join(__dirname, 'public')));
