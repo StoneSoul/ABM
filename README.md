@@ -31,6 +31,7 @@ DB_NAME=
 SUITE_API=
 WP_API=
 SESSION_SECRET=
+SESSION_COOKIE_SECURE=
 WP_TOKEN=
 WP_HOST=
 WP_USER=
@@ -48,6 +49,12 @@ Ajusta cada valor según tu configuración local o de producción.
 `WP_TOKEN` debe coincidir con el valor configurado en WordPress mediante la
 constante `ABM_SYNC_TOKEN` (o la opción `abm_sync_token`). Este token se envía en
 la cabecera `Authorization` al llamar a los endpoints del plugin.
+
+Si necesitas exponer el sitio únicamente por HTTP (por ejemplo, en entornos
+internos sin SSL), define `SESSION_COOKIE_SECURE=false`. De lo contrario, el
+cookie de sesión no se guardará en el navegador y los usuarios no podrán
+autenticarse. Cuando el despliegue utilice HTTPS, establece
+`SESSION_COOKIE_SECURE=true` para mantener la cookie marcada como segura.
 
 ## Uso
 

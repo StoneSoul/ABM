@@ -47,6 +47,24 @@ setInterval(async () => {
 
 const app = express();
 
+const parseBoolean = (value, defaultValue) => {
+  if (typeof value === 'undefined') {
+    return defaultValue;
+  }
+
+  if (typeof value === 'string') {
+    const normalized = value.trim().toLowerCase();
+    if (['true', '1', 'yes'].includes(normalized)) {
+      return true;
+    }
+    if (['false', '0', 'no'].includes(normalized)) {
+      return false;
+    }
+  }
+
+  return Boolean(value);
+};
+
 const sessionStore = new MySQLStore({
   host: process.env.DB_HOST,
   port: process.env.DB_PORT,
@@ -62,7 +80,10 @@ app.use(
     saveUninitialized: false,
     store: sessionStore,
     cookie: {
-      secure: process.env.NODE_ENV === 'production',
+      secure: parseBoolean(
+        process.env.SESSION_COOKIE_SECURE,
+        process.env.NODE_ENV === 'production'
+      ),
       httpOnly: true,
       sameSite: 'lax',
     },
