@@ -4,14 +4,16 @@ const axios = require('axios');
 const SUITE_API = process.env.SUITE_API;
 
 
-exports.syncToSuite = async ({ username, password, rol_suite, nombre, apellido }) => {
+exports.syncToSuite = async ({ username, password, rol_suite, nombre, apellido, firma, matricula }) => {
   try {
     await axios.post(`${SUITE_API}/create`, {
       username,
       password,
       rol_suite,
       nombre,
-      apellido
+      apellido,
+      firma,
+      matricula
     });
   } catch (error) {
     console.error('Error sincronizando con Suite:', error.response?.data || error);
@@ -19,12 +21,9 @@ exports.syncToSuite = async ({ username, password, rol_suite, nombre, apellido }
   }
 };
 
-exports.actualizarUsuario = async ({ username, password, rol_suite }) => {
+exports.actualizarUsuario = async ({ username, firma, matricula }) => {
   try {
-    const payload = { username, rol_suite };
-    if (password) {
-      payload.password = password;
-    }
+    const payload = { username, firma, matricula };
     await axios.post(`${SUITE_API}/update-user`, payload);
   } catch (error) {
     console.error('Error actualizando el usuario con Suite:', error.response?.data || error);
