@@ -186,12 +186,20 @@ exports.passwordCambiadaDesdeWp = async (req, res, next) => {
 
 exports.listarUsuarios = async (req, res, next) => {
   try {
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const offset = (page - 1) * limit;
+    const search = req.query.search ? `%${req.query.search}%` : '%';
+
     const [rows] = await pool.execute(
       `SELECT username, email, nombre_completo, rol, rol_suite, cod_profesional, estado
        FROM usuarios
-       ORDER BY fecha_alta DESC`
+       WHERE username LIKE ? OR email LIKE ?
+       ORDER BY fecha_alta DESC
+       LIMIT ? OFFSET ?`,
+      [search, search, limit, offset]
     );
-    res.json(rows);
+    res.json({ datos: rows, pagina: page, limite: limit });
   } catch (error) {
     console.error('❌ Error al listar usuarios:', error);
     next(error);
