@@ -111,8 +111,8 @@ app.use(
   })
 );
 app.use(express.json());
-app.use(ensureLoggedIn);
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(ensureLoggedIn);
 app.use('/api/auth', authRouter);
 app.use('/api/usuarios', usuariosRouter);
 app.use('/api/registros', registrosRouter);
