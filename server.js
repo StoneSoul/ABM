@@ -93,9 +93,10 @@ app.use(
 app.use(
   helmet({
     contentSecurityPolicy: {
+      useDefaults: false,
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", 'https://cdn.tailwindcss.com'],
+        scriptSrc: ["'self'", 'https://cdn.tailwindcss.com', "'unsafe-inline'"],
         connectSrc: ["'self'"],
         imgSrc: ["'self'", 'data:'],
         styleSrc: ["'self'", "'unsafe-inline'"],
@@ -108,6 +109,7 @@ app.use(
     crossOriginOpenerPolicy: false,
     crossOriginEmbedderPolicy: false,
     originAgentCluster: false,
+    hsts: false,
   })
 );
 app.use(express.json());

@@ -187,25 +187,33 @@ exports.passwordCambiadaDesdeWp = async (req, res, next) => {
 exports.listarUsuarios = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page, 10) || 1;
-    const limit = parseInt(req.query.limit, 10) || 10;
+    const limit = parseInt(req.query.limit, 13) || 10;
     const offset = (page - 1) * limit;
     const search = req.query.search ? `%${req.query.search}%` : '%';
+
+    // Conteo total de usuarios filtrados
+    const [[{ total }]] = await pool.execute(
+      `SELECT COUNT(*) AS total
+       FROM usuarios
+       WHERE username LIKE ? OR email LIKE ?`,
+      [search, search]
+    );
 
     const [rows] = await pool.execute(
       `SELECT username, email, nombre_completo, rol, rol_suite, cod_profesional, estado
        FROM usuarios
        WHERE username LIKE ? OR email LIKE ?
        ORDER BY fecha_alta DESC
-       LIMIT ? OFFSET ?`,
-      [search, search, limit, offset]
+       LIMIT ${limit} OFFSET ${offset}`,
+      [search, search]
     );
-    res.json({ datos: rows, pagina: page, limite: limit });
+
+    res.json({ datos: rows, pagina: page, limite: limit, total });
   } catch (error) {
     console.error('❌ Error al listar usuarios:', error);
     next(error);
   }
 };
-
 exports.cambiarEstado = async (req, res, next) => {
   try {
     const { username, estado } = req.body;

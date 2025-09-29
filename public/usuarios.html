@@ -36,6 +36,7 @@
           <!-- generado dinámicamente -->
         </tbody>
       </table>
+      <div id="paginacion" class="mt-4 flex justify-center space-x-2"></div>
     </div>
 
     <dialog id="rolesDialog" class="p-4 bg-white rounded-md shadow-lg">
@@ -82,16 +83,18 @@
         });
       });
 
-      async function cargarUsuarios() {
+      async function cargarUsuarios(pagina = 1) {
         await cargarRolesSuite();
-        const res = await fetch('/api/usuarios');
-        const datos = await res.json();
-        const tbody = document.getElementById('contenidoTabla');
+        const searchInput = document.getElementById('buscador');
+        const filtro = searchInput.value || '';
+
+        const res = await fetch(`/api/usuarios?page=${pagina}&limit=10&search=${encodeURIComponent(filtro)}`);
+        const json = await res.json();
+        const datos = json.datos;        const tbody = document.getElementById('contenidoTabla');
         tbody.innerHTML = '';
 
         for (const u of datos) {
           const fila = document.createElement('tr');
-
           const estaActivo = u.estado === '1' || u.estado === 1 || u.estado === 'activo';
 
           const td = (text) => {
@@ -126,14 +129,13 @@
             ? 'bg-red-500 text-white px-2 py-1 text-sm rounded hover:bg-red-600'
             : 'bg-green-500 text-white px-2 py-1 text-sm rounded hover:bg-green-600';
           btn.onclick = async () => {
-            const confirmacion = confirm(`¿Deseas ${btn.textContent.toLowerCase()} este usuario?`);
-            if (!confirmacion) return;
+            if (!confirm(`¿Deseas ${btn.textContent.toLowerCase()} este usuario?`)) return;
             const res = await fetch('/api/usuarios/estado', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ username: u.username, estado: estaActivo ? 0 : 1 })
             });
-            if (res.ok) cargarUsuarios();
+            if (res.ok) cargarUsuarios(pagina);
           };
           accion.appendChild(btn);
           fila.appendChild(accion);
@@ -149,6 +151,9 @@
 
           tbody.appendChild(fila);
         }
+
+        // Renderizamos paginación
+        renderPaginacion(json.pagina, json.limite, json.total);
       }
 
       function ordenar(columna) {
@@ -169,13 +174,46 @@
       }
 
       document.getElementById('buscador').addEventListener('input', (e) => {
-        const filtro = e.target.value.toLowerCase();
-        const filas = document.querySelectorAll('#contenidoTabla tr');
-        filas.forEach(fila => {
-          const texto = fila.textContent.toLowerCase();
-          fila.style.display = texto.includes(filtro) ? '' : 'none';
-        });
+        const filtro = e.target.value;
+        cargarUsuarios(1); // siempre cargamos página 1 al cambiar el buscador
       });
+
+      function renderPaginacion(pagina, limite, total) {
+        const pagDiv = document.getElementById('paginacion');
+        pagDiv.innerHTML = '';
+
+        const totalPaginas = Math.ceil(total / limite);
+        if (totalPaginas <= 1) return; // no mostramos si hay 1 página
+
+        const crearBoton = (text, targetPage, activo = false) => {
+          const btn = document.createElement('button');
+          btn.textContent = text;
+          btn.className = `px-3 py-1 rounded ${activo ? 'bg-blue-500 text-white mb-2' : 'bg-gray-200 text-gray-700 hover:bg-gray-300 mb-2'}`;
+          btn.onclick = () => cargarUsuarios(targetPage);
+          return btn;
+        };
+
+        // Botón Primera página
+        if (pagina > 1) pagDiv.appendChild(crearBoton('<<', 1));
+
+        // Determinar rango de páginas visibles (máx. 6)
+        let start = Math.max(1, pagina - 3);
+        let end = Math.min(totalPaginas, start + 6);
+        if (end - start < 6) start = Math.max(1, end - 6);
+
+        for (let i = start; i <= end; i++) {
+          pagDiv.appendChild(crearBoton(i, i, i === pagina));
+        }
+
+        // Botón Última página
+        if (pagina < totalPaginas) pagDiv.appendChild(crearBoton('>>', totalPaginas));
+
+        // Indicador de página
+        const info = document.createElement('span');
+        info.textContent = ` Página ${pagina} de ${totalPaginas} `;
+        info.className = 'px-2 text-gray-700';
+        pagDiv.prepend(info);
+      }
 
       cargarUsuarios();
     </script>
