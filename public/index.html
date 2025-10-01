@@ -38,7 +38,10 @@
 
   <script>
     function cerrarSesion() {
-      fetch('/api/auth/logout', { method: 'POST' }).then(() => {
+      fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include'
+      }).then(() => {
         window.location.href = '/login.html';
       });
     }

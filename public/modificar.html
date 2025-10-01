@@ -85,7 +85,13 @@
       let rolesDisponibles = [];
 
       async function fetchRolesDisponibles() {
-        const res = await fetch('/api/usuarios/roles_suite');
+        const res = await fetch('/api/usuarios/roles_suite', {
+          credentials: 'include'
+        });
+        if (res.status === 401) {
+          window.location.href = '/login.html';
+          return;
+        }
         rolesDisponibles = await res.json();
       }
 
@@ -193,7 +199,13 @@
 
       async function cargarDatosUsuario() {
         await fetchRolesDisponibles();
-        const res = await fetch(`/api/usuarios/${encodeURIComponent(username)}`);
+        const res = await fetch(`/api/usuarios/${encodeURIComponent(username)}`, {
+          credentials: 'include'
+        });
+        if (res.status === 401) {
+          window.location.href = '/login.html';
+          return;
+        }
         if (!res.ok) return;
         const usuario = await res.json();
 
@@ -221,7 +233,7 @@
 
         const data = { username: formData.get('username').trim() };
 
-        ['password', 'email', 'rol', 'cod_profesional', 'nombre', 'apellido', 'alias']
+        ['password', 'email', 'rol', 'cod_profesional', 'nombre', 'apellido', 'alias', 'firma', 'matricula']
           .forEach((campo) => {
             const valor = formData.get(campo);
             if (valor && valor.trim() !== '') {
@@ -237,12 +249,20 @@
         const res = await fetch('/api/usuarios/modificar', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
           body: JSON.stringify(data)
         });
+        if (res.status === 401) {
+          window.location.href = '/login.html';
+          return;
+        }
+        if (!res.ok) {
+          const error = await res.json().catch(() => ({ mensaje: 'Error al modificar el usuario' }));
+          alert(error.mensaje || error.error || 'Error al modificar el usuario');
+          return;
+        }
         if (res.ok) {
           alert('Usuario modificado correctamente');
-        } else {
-          alert('Error al modificar el usuario');
         }
       });
     </script>

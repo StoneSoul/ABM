@@ -22,9 +22,15 @@ const ensureLoggedIn = (req, res, next) => {
     '/styles.css',
     '/api/usuarios/wp-password-change',
   ];
+
+  if (req.method === 'OPTIONS') {
+    return next();
+  }
+
   if (req.session && req.session.authenticated) {
     return next();
   }
+
   if (
     publicPaths.includes(req.path) ||
     req.path.startsWith('/api/auth/login') ||
@@ -32,6 +38,11 @@ const ensureLoggedIn = (req, res, next) => {
   ) {
     return next();
   }
+
+  if (req.path.startsWith('/api/')) {
+    return res.status(401).json({ error: 'No autorizado' });
+  }
+
   return res.redirect('/login.html');
 };
 require('dotenv').config();

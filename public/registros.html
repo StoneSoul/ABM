@@ -43,7 +43,13 @@
 
       async function cargarRegistros() {
         const q = document.getElementById('buscadorReg').value;
-        const res = await fetch('/api/registros' + (q ? ('?q=' + encodeURIComponent(q)) : ''));
+        const res = await fetch('/api/registros' + (q ? ('?q=' + encodeURIComponent(q)) : ''), {
+          credentials: 'include'
+        });
+        if (res.status === 401) {
+          window.location.href = '/login.html';
+          return;
+        }
         const datos = await res.json();
         const tbody = document.querySelector('#tablaRegistros tbody');
         tbody.innerHTML = '';
