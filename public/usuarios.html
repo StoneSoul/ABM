@@ -101,8 +101,25 @@
           window.location.href = '/login.html';
           return;
         }
-        const json = await res.json();
-        const datos = json.datos;        const tbody = document.getElementById('contenidoTabla');
+
+        let json;
+        try {
+          json = await res.json();
+        } catch (error) {
+          console.error('No se pudo interpretar la respuesta del servidor', error);
+          alert('No se pudo cargar la lista de usuarios. Intenta nuevamente más tarde.');
+          return;
+        }
+
+        if (!res.ok) {
+          const mensaje = json && json.error ? json.error : 'Error interno del servidor';
+          console.error('Error al cargar usuarios:', mensaje);
+          alert(`No se pudo cargar la lista de usuarios. ${mensaje}`);
+          return;
+        }
+
+        const datos = Array.isArray(json.datos) ? json.datos : [];
+        const tbody = document.getElementById('contenidoTabla');
         tbody.innerHTML = '';
 
         for (const u of datos) {
@@ -170,7 +187,10 @@
         }
 
         // Renderizamos paginación
-        renderPaginacion(json.pagina, json.limite, json.total);
+        const paginaActual = Number.isFinite(json.pagina) ? json.pagina : pagina;
+        const limite = Number.isFinite(json.limite) ? json.limite : 10;
+        const total = Number.isFinite(json.total) ? json.total : datos.length;
+        renderPaginacion(paginaActual, limite, total);
       }
 
       function ordenar(columna) {
