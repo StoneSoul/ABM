@@ -63,7 +63,14 @@ exports.crearUsuario = async (req, res, next) => {
 
 exports.modificarUsuario = async (req, res, next) => {
   try {
-    const datos = req.body;
+    const datos = { ...req.body };
+    const username = (datos.username || req.params.username || '').trim();
+
+    if (!username) {
+      return res.status(400).json({ mensaje: 'El nombre de usuario es obligatorio' });
+    }
+
+    datos.username = username;
 
     if (Array.isArray(datos.rol_suite)) {
       datos.rol_suite = datos.rol_suite.filter((r) => r).join(',');
@@ -90,9 +97,15 @@ exports.modificarUsuario = async (req, res, next) => {
     };
 
     for (const [campo, columna] of Object.entries(campos)) {
-      if (datos[campo]) {
+      if (
+        Object.prototype.hasOwnProperty.call(datos, campo) &&
+        datos[campo] !== undefined &&
+        datos[campo] !== null &&
+        String(datos[campo]).trim() !== ''
+      ) {
+        const valor = typeof datos[campo] === 'string' ? datos[campo].trim() : datos[campo];
         actualizaciones.push(`${columna} = ?`);
-        valores.push(datos[campo]);
+        valores.push(valor);
       }
     }
 
@@ -106,7 +119,7 @@ exports.modificarUsuario = async (req, res, next) => {
       return res.status(400).json({ mensaje: 'No hay datos para actualizar' });
     }
 
-    valores.push(datos.username);
+    valores.push(username);
 
     const query = `UPDATE usuarios SET ${actualizaciones.join(', ')}, fecha_modificacion = NOW() WHERE username = ?`;
 
@@ -115,8 +128,8 @@ exports.modificarUsuario = async (req, res, next) => {
     await pool.execute(query, valores);
 
     if (datos.password && datos.password.trim() !== '') {
-      await registrarCambioClave(datos.username, datos.password, 'admin');
-      await actualizarPassword(datos.username, datos.password);
+      await registrarCambioClave(username, datos.password, 'admin');
+      await actualizarPassword(username, datos.password);
     }
 
     res.json({ mensaje: 'Usuario modificado correctamente' });
@@ -187,26 +200,28 @@ exports.passwordCambiadaDesdeWp = async (req, res, next) => {
 exports.listarUsuarios = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page, 10) || 1;
-    const limit = parseInt(req.query.limit, 13) || 10;
+    const limit = parseInt(req.query.limit, 10) || 10;
     const offset = (page - 1) * limit;
-    const search = req.query.search ? `%${req.query.search}%` : '%';
+    const searchValue = req.query.search ? req.query.search.trim() : '';
+    const search = searchValue ? `%${searchValue}%` : '%';
+    const searchParams = [search, search, search, search, search, search];
 
     // Conteo total de usuarios filtrados
     const [countRows] = await pool.execute(
       `SELECT COUNT(*) AS total
        FROM usuarios
-       WHERE username LIKE ? OR email LIKE ?`,
-      [search, search]
+       WHERE username LIKE ? OR email LIKE ? OR nombre LIKE ? OR apellido LIKE ? OR nombre_completo LIKE ? OR cod_profesional LIKE ?`,
+      searchParams
     );
     const total = (countRows && countRows[0] && countRows[0].total) || 0;
 
     const [rows] = await pool.execute(
       `SELECT username, email, nombre_completo, rol, rol_suite, cod_profesional, estado
        FROM usuarios
-       WHERE username LIKE ? OR email LIKE ?
+       WHERE username LIKE ? OR email LIKE ? OR nombre LIKE ? OR apellido LIKE ? OR nombre_completo LIKE ? OR cod_profesional LIKE ?
        ORDER BY fecha_alta DESC
        LIMIT ? OFFSET ?`,
-      [search, search, limit, offset]
+      [...searchParams, limit, offset]
     );
 
     res.json({ datos: rows, pagina: page, limite: limit, total });
