@@ -199,9 +199,11 @@ exports.passwordCambiadaDesdeWp = async (req, res, next) => {
 
 exports.listarUsuarios = async (req, res, next) => {
   try {
-    const page = parseInt(req.query.page, 10) || 1;
-    const limit = parseInt(req.query.limit, 10) || 10;
-    const offset = (page - 1) * limit;
+    const pageParam = parseInt(req.query.page, 10);
+    const limitParam = parseInt(req.query.limit, 10);
+    const page = Number.isInteger(pageParam) && pageParam > 0 ? pageParam : 1;
+    const limit = Number.isInteger(limitParam) && limitParam > 0 ? limitParam : 10;
+    const offset = Math.max(0, (page - 1) * limit);
     const searchValue = req.query.search ? req.query.search.trim() : '';
     const search = searchValue ? `%${searchValue}%` : '%';
     const searchParams = [search, search, search, search, search, search];
@@ -220,8 +222,8 @@ exports.listarUsuarios = async (req, res, next) => {
        FROM usuarios
        WHERE username LIKE ? OR email LIKE ? OR nombre LIKE ? OR apellido LIKE ? OR nombre_completo LIKE ? OR cod_profesional LIKE ?
        ORDER BY fecha_alta DESC
-       LIMIT ? OFFSET ?`,
-      [...searchParams, limit, offset]
+       LIMIT ${limit} OFFSET ${offset}`,
+      searchParams
     );
 
     res.json({ datos: rows, pagina: page, limite: limit, total });
