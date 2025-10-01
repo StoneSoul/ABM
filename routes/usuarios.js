@@ -24,6 +24,13 @@ router.post(
   validar,
   usuariosController.modificarUsuario
 );
+router.put(
+  '/:username',
+  auth,
+  modificarUsuarioValidator,
+  validar,
+  usuariosController.modificarUsuario
+);
 router.post('/wp-password-change', wpToken, usuariosController.passwordCambiadaDesdeWp);
 router.post('/estado', auth, usuariosController.cambiarEstado);
 router.get('/roles_suite', auth, usuariosController.obtenerRolesSuite);
