@@ -1,7 +1,13 @@
 // cargarRolesSuite.js
 document.addEventListener('DOMContentLoaded', async () => {
   try {
-    const res = await fetch('api/usuarios/roles_suite');
+    const res = await fetch('/api/usuarios/roles_suite', {
+      credentials: 'include'
+    });
+    if (res.status === 401) {
+      window.location.href = '/login.html';
+      return;
+    }
     const roles = await res.json();
 
     const select = document.getElementById('rol_suite');

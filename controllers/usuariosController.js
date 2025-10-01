@@ -192,20 +192,21 @@ exports.listarUsuarios = async (req, res, next) => {
     const search = req.query.search ? `%${req.query.search}%` : '%';
 
     // Conteo total de usuarios filtrados
-    const [[{ total }]] = await pool.execute(
+    const [countRows] = await pool.execute(
       `SELECT COUNT(*) AS total
        FROM usuarios
        WHERE username LIKE ? OR email LIKE ?`,
       [search, search]
     );
+    const total = (countRows && countRows[0] && countRows[0].total) || 0;
 
     const [rows] = await pool.execute(
       `SELECT username, email, nombre_completo, rol, rol_suite, cod_profesional, estado
        FROM usuarios
        WHERE username LIKE ? OR email LIKE ?
        ORDER BY fecha_alta DESC
-       LIMIT ${limit} OFFSET ${offset}`,
-      [search, search]
+       LIMIT ? OFFSET ?`,
+      [search, search, limit, offset]
     );
 
     res.json({ datos: rows, pagina: page, limite: limit, total });

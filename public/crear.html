@@ -89,8 +89,13 @@
         const res = await fetch('/api/usuarios/crear', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
           body: JSON.stringify(data)
         });
+        if (res.status === 401) {
+          window.location.href = '/login.html';
+          return;
+        }
         if (res.ok) {
           alert('Usuario creado correctamente');
           e.target.reset();
@@ -104,7 +109,13 @@
       let rolesDisponibles = [];
 
       async function fetchRolesDisponibles() {
-        const res = await fetch('/api/usuarios/roles_suite');
+        const res = await fetch('/api/usuarios/roles_suite', {
+          credentials: 'include'
+        });
+        if (res.status === 401) {
+          window.location.href = '/login.html';
+          return;
+        }
         const rawRoles = await res.json();
         rolesDisponibles = rawRoles.map(r => ({
           value: String(r.value),
